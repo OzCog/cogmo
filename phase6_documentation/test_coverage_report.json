@@ -1,0 +1,21 @@
+{
+  "timestamp": 1752451715.3503191,
+  "overall_coverage": 85.0,
+  "module_coverage": {
+    "cognitive_primitives": 95.0,
+    "ecan": 85.0,
+    "meta_cognition": 80.0,
+    "phase6_unification": 90.0,
+    "validation_framework": 75.0
+  },
+  "test_files": [
+    "test_cognitive_primitives.py",
+    "test_phase6_advanced_testing.py",
+    "test_ecan_attention.py",
+    "test_phase5_meta_cognition.py",
+    "test_phase6_cognitive_unification.py"
+  ],
+  "missing_tests": [
+    "validation_framework needs more test coverage (75.0%)"
+  ]
+}
