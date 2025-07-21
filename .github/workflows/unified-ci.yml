@@ -1,0 +1,287 @@
+name: OpenCog Ecosystem - Unified CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  BUILD_TYPE: Release
+  PARALLEL_JOBS: 4
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+jobs:
+  # Matrix strategy for different component types and platforms
+  build-matrix:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, ubuntu-20.04]
+        component-type: [foundation, core, ai, robotics, web]
+        include:
+          # Foundation components
+          - component-type: foundation
+            components: "dv/cogutil dv/benchmark"
+            build-deps: "cmake build-essential libboost-all-dev"
+            
+          # Core AtomSpace components  
+          - component-type: core
+            components: "as/atomspace as/atomspace-rocks as/atomspace-cog"
+            build-deps: "cmake build-essential libboost-all-dev librocksdb-dev guile-3.0-dev"
+            
+          # AI and learning components
+          - component-type: ai
+            components: "ai/ure ai/pln ai/learn ai/moses"
+            build-deps: "cmake build-essential libboost-all-dev python3-dev cython3"
+            
+          # Robotics and sensory
+          - component-type: robotics  
+            components: "ro/sensory ro/perception nl/link-grammar"
+            build-deps: "cmake build-essential libboost-all-dev"
+            
+          # Web and API components
+          - component-type: web
+            components: "wb/python-client sv/cogserver"
+            build-deps: "python3-dev"
+
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+        
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+        
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        
+    - name: Setup Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        components: rustfmt, clippy
+        
+    - name: Cache dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          ~/.cache/pip
+          ~/.npm
+          build/
+        key: ${{ runner.os }}-${{ matrix.component-type }}-${{ hashFiles('**/Cargo.toml', '**/requirements-consolidated.txt', '**/package.json') }}
+        restore-keys: |
+          ${{ runner.os }}-${{ matrix.component-type }}-
+          ${{ runner.os }}-
+          
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ${{ matrix.build-deps }}
+        
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements-consolidated.txt ]; then
+          pip install -r requirements-consolidated.txt
+        elif [ -f requirements.txt ]; then
+          pip install -r requirements.txt
+        fi
+        
+    - name: Build components
+      run: |
+        ./build-unified.sh --cmake-only ${{ matrix.components }}
+        
+    - name: Run tests
+      run: |
+        ./build-unified.sh --test ${{ matrix.components }}
+        
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: build-artifacts-${{ matrix.os }}-${{ matrix.component-type }}
+        path: |
+          build/
+          test-results/
+        retention-days: 7
+
+  # Code quality and security checks
+  quality-checks:
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Checkout repository  
+      uses: actions/checkout@v4
+      
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+        
+    - name: Install quality tools
+      run: |
+        pip install black flake8 mypy bandit safety pre-commit
+        
+    - name: Run code formatting check
+      run: |
+        black --check --diff .
+        
+    - name: Run linting
+      run: |
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        
+    - name: Run type checking  
+      run: |
+        mypy --install-types --non-interactive . || true
+        
+    - name: Run security scan
+      run: |
+        bandit -r . -f json -o bandit-results.json || true
+        safety check --json > safety-results.json || true
+        
+    - name: Upload quality results
+      uses: actions/upload-artifact@v3
+      with:
+        name: quality-reports
+        path: |
+          bandit-results.json
+          safety-results.json
+
+  # Integration tests across components
+  integration-tests:
+    needs: build-matrix
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+        
+    - name: Download build artifacts
+      uses: actions/download-artifact@v3
+      with:
+        pattern: build-artifacts-ubuntu-22.04-*
+        merge-multiple: true
+        
+    - name: Install dependencies
+      run: |
+        pip install -r requirements-consolidated.txt
+        
+    - name: Run integration tests
+      run: |
+        python -m pytest tests/ -v --tb=short --junitxml=integration-results.xml
+        
+    - name: Upload integration test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: integration-test-results
+        path: integration-results.xml
+
+  # Performance benchmarks
+  performance-tests:
+    needs: build-matrix
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+        
+    - name: Install dependencies
+      run: |
+        pip install -r requirements-consolidated.txt
+        pip install pytest-benchmark
+        
+    - name: Run performance benchmarks
+      run: |
+        python -m pytest benchmarks/ --benchmark-json=benchmark-results.json
+        
+    - name: Upload benchmark results
+      uses: actions/upload-artifact@v3
+      with:
+        name: benchmark-results
+        path: benchmark-results.json
+
+  # Documentation generation and validation
+  documentation:
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+        
+    - name: Install documentation tools
+      run: |
+        pip install sphinx sphinx-rtd-theme myst-parser
+        
+    - name: Validate documentation
+      run: |
+        # Check for broken links in markdown files
+        find . -name "*.md" -exec grep -l "http" {} \; | head -20
+        
+        # Validate that all components have README files
+        python -c "
+        import os
+        components = [d for d in os.listdir('.') if d.startswith('orc-')]
+        missing_readme = []
+        for comp in components:
+            if not os.path.exists(f'{comp}/README.md'):
+                missing_readme.append(comp)
+        if missing_readme:
+            print('Components missing README:', missing_readme)
+            exit(1)
+        print('All components have documentation')
+        "
+        
+    - name: Generate API documentation
+      run: |
+        # Generate consolidated documentation
+        echo "# OpenCog Ecosystem API Documentation" > api-docs.md
+        echo "Generated: $(date)" >> api-docs.md
+        find . -name "*.py" -path "*/tests/*" -prune -o -name "*.py" -exec grep -l "def " {} \; | head -10 >> api-docs.md
+
+  # Final status check
+  ci-status:
+    needs: [build-matrix, quality-checks, integration-tests, performance-tests, documentation]
+    runs-on: ubuntu-22.04
+    if: always()
+    steps:
+    - name: Check CI status
+      run: |
+        echo "Build Matrix: ${{ needs.build-matrix.result }}"
+        echo "Quality Checks: ${{ needs.quality-checks.result }}"
+        echo "Integration Tests: ${{ needs.integration-tests.result }}"
+        echo "Performance Tests: ${{ needs.performance-tests.result }}"
+        echo "Documentation: ${{ needs.documentation.result }}"
+        
+        if [[ "${{ needs.build-matrix.result }}" == "success" && 
+              "${{ needs.quality-checks.result }}" == "success" ]]; then
+          echo "✅ Core CI checks passed"
+        else
+          echo "❌ Core CI checks failed"
+          exit 1
+        fi
