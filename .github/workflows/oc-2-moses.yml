@@ -26,14 +26,12 @@ jobs:
           timeout 120 sudo apt-get update --fix-missing -y || echo "apt-get update timed out, continuing..."
         timeout-minutes: 2
         continue-on-error: true
-        continue-on-error: true
         
       - name: Install dependencies
         run: |
           export DEBIAN_FRONTEND=noninteractive
-          timeout 300 timeout 300 sudo apt-get install -y --no-install-recommends build-essential cmake libboost-all-dev python3-nose valgrind doxygen libmpi-dev  || echo "Some packages failed to install, continuing..."|| echo "Some packages failed to install, continuing..."
+          timeout 120 sudo apt-get install -y --no-install-recommends build-essential cmake libboost-all-dev python3-nose valgrind doxygen libmpi-dev  || echo "Some packages failed to install, continuing..."
         timeout-minutes: 5
-        continue-on-error: true
         continue-on-error: true
           
       - name: Restore cogutil cache
@@ -48,7 +46,6 @@ jobs:
           sudo make install || echo "cogutil install failed, continuing..."
           sudo ldconfig
         continue-on-error: true
-        continue-on-error: true
           
       - name: Build MOSES
         run: |
@@ -56,7 +53,6 @@ jobs:
           mkdir -p build && cd build
           cmake .. -DCMAKE_BUILD_TYPE=Release || echo "cmake configuration failed, continuing..."
           make -j$(nproc) || echo "make build failed, continuing..."
-        continue-on-error: true
         continue-on-error: true
           
       - name: Test MOSES
