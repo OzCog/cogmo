@@ -180,9 +180,7 @@ jobs:
         run: |
           echo "timestamp=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_OUTPUT
           echo "commit_sha=${{ github.sha }}" >> $GITHUB_OUTPUT
-          echo "commit_message<<EOF" >> $GITHUB_OUTPUT
-          git log -1 --pretty=format:"%s" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          echo "commit_message=$(git log -1 --pretty=format:'%s')" >> $GITHUB_OUTPUT
           echo "ref_name=${{ github.ref_name }}" >> $GITHUB_OUTPUT
           echo "event_name=${{ github.event_name }}" >> $GITHUB_OUTPUT
 
