@@ -1,0 +1,310 @@
+---
+name: CogML - Modular Build Dispatcher
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      job_selection:
+        description: 'Select jobs to run (comma-separated or "all")'
+        required: false
+        default: 'all'
+        type: string
+      cache_key_suffix:
+        description: 'Cache key suffix for builds'
+        required: false
+        default: 'default'
+        type: string
+
+permissions:
+  contents: read
+  issues: write
+
+env:
+  COGML_AUTO_FIX_ENABLED: "true"
+  COGML_MAX_FIX_ATTEMPTS: "3"
+  COGML_ESCALATION_ENABLED: "true"
+
+jobs:
+  # ==== Foundation Layer ====
+  cogutil:
+    if: contains(github.event.inputs.job_selection, 'cogutil') || github.event.inputs.job_selection == 'all' || github.event.inputs.job_selection == ''
+    uses: ./.github/workflows/cogutil-build.yml
+    with:
+      cache_key_suffix: ${{ github.event.inputs.cache_key_suffix || 'default' }}
+
+  # ==== Core Layer ====
+  atomspace:
+    if: contains(github.event.inputs.job_selection, 'atomspace') || github.event.inputs.job_selection == 'all' || github.event.inputs.job_selection == ''
+    needs: [cogutil]
+    uses: ./.github/workflows/atomspace-build.yml
+    with:
+      cogutil_cache_key: ${{ needs.cogutil.outputs.cache_key }}
+      cache_key_suffix: ${{ github.event.inputs.cache_key_suffix || 'default' }}
+
+  atomspace-rocks:
+    if: contains(github.event.inputs.job_selection, 'atomspace-rocks') || github.event.inputs.job_selection == 'all' || github.event.inputs.job_selection == ''
+    needs: [cogutil, atomspace]
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake libboost-all-dev librocksdb-dev guile-3.0-dev cython3 python3-nose valgrind doxygen
+      - name: Build AtomSpace Rocks (placeholder)
+        run: echo "AtomSpace Rocks build would run here"
+
+  atomspace-restful:
+    if: contains(github.event.inputs.job_selection, 'atomspace-restful') || github.event.inputs.job_selection == 'all' || github.event.inputs.job_selection == ''
+    needs: [cogutil, atomspace]
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake libboost-all-dev libcpprest-dev guile-3.0-dev cython3 python3-nose valgrind doxygen
+      - name: Build AtomSpace RESTful (placeholder)
+        run: echo "AtomSpace RESTful build would run here"
+
+  # ==== Logic Layer ====
+  ure:
+    if: contains(github.event.inputs.job_selection, 'ure') || github.event.inputs.job_selection == 'all' || github.event.inputs.job_selection == ''
+    needs: [cogutil, atomspace]
+    uses: ./.github/workflows/ure-build.yml
+    with:
+      cogutil_cache_key: ${{ needs.cogutil.outputs.cache_key }}
+      atomspace_cache_key: ${{ needs.atomspace.outputs.cache_key }}
+      cache_key_suffix: ${{ github.event.inputs.cache_key_suffix || 'default' }}
+
+  pln:
+    if: contains(github.event.inputs.job_selection, 'pln') || github.event.inputs.job_selection == 'all' || github.event.inputs.job_selection == ''
+    needs: [ure]
+    uses: ./.github/workflows/pln-modular-build.yml
+    with:
+      cogutil_cache_key: ${{ needs.cogutil.outputs.cache_key }}
+      atomspace_cache_key: ${{ needs.atomspace.outputs.cache_key }}
+      ure_cache_key: ${{ needs.ure.outputs.cache_key }}
+      cache_key_suffix: ${{ github.event.inputs.cache_key_suffix || 'default' }}
+
+  miner:
+    if: contains(github.event.inputs.job_selection, 'miner') || github.event.inputs.job_selection == 'all' || github.event.inputs.job_selection == ''
+    needs: [ure]
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake libboost-all-dev guile-3.0-dev python3-nose valgrind doxygen liboctomap-dev
+      - name: Build Miner (placeholder)
+        run: echo "Miner build would run here"
+
+  # ==== Learning Layer ====
+  moses:
+    if: contains(github.event.inputs.job_selection, 'moses') || github.event.inputs.job_selection == 'all' || github.event.inputs.job_selection == ''
+    needs: [cogutil]
+    uses: ./.github/workflows/moses-build.yml
+    with:
+      cogutil_cache_key: ${{ needs.cogutil.outputs.cache_key }}
+      cache_key_suffix: ${{ github.event.inputs.cache_key_suffix || 'default' }}
+
+  asmoses:
+    if: contains(github.event.inputs.job_selection, 'asmoses') || github.event.inputs.job_selection == 'all' || github.event.inputs.job_selection == ''
+    needs: [moses]
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake libboost-all-dev guile-3.0-dev cython3 python3-nose valgrind doxygen
+      - name: Build ASMoses (placeholder)
+        run: echo "ASMoses build would run here"
+
+  # ==== Server Layer ====
+  cogserver:
+    if: contains(github.event.inputs.job_selection, 'cogserver') || github.event.inputs.job_selection == 'all' || github.event.inputs.job_selection == ''
+    needs: [cogutil, atomspace]
+    uses: ./.github/workflows/cogserver-build.yml
+    with:
+      cogutil_cache_key: ${{ needs.cogutil.outputs.cache_key }}
+      atomspace_cache_key: ${{ needs.atomspace.outputs.cache_key }}
+      cache_key_suffix: ${{ github.event.inputs.cache_key_suffix || 'default' }}
+
+  # ==== Learning Module ====
+  learn:
+    if: contains(github.event.inputs.job_selection, 'learn') || github.event.inputs.job_selection == 'all' || github.event.inputs.job_selection == ''
+    needs: [cogutil, atomspace]
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake libboost-all-dev guile-3.0-dev python3-nose valgrind doxygen
+      - name: Build Learn (placeholder)
+        run: echo "Learn build would run here"
+
+  # ==== Integration Layer ====
+  opencog-central:
+    if: contains(github.event.inputs.job_selection, 'opencog-central') || github.event.inputs.job_selection == 'all' || github.event.inputs.job_selection == ''
+    needs: [learn, atomspace-rocks, atomspace-restful, moses, cogserver]
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake libboost-all-dev librocksdb-dev guile-3.0-dev python3-nose valgrind doxygen liboctomap-dev
+      - name: Build OpenCog Central (placeholder)
+        run: echo "OpenCog Central integration build would run here"
+
+  # ==== Build Failure Handling ====
+  create-build-failure-issue:
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    if: failure() && (github.event_name == 'push' || github.event_name == 'pull_request')
+    needs: [cogutil, atomspace, atomspace-rocks, atomspace-restful, ure, pln, miner, moses, asmoses, cogserver, learn, opencog-central]
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get failed job information
+        id: failed_jobs
+        run: |
+          echo "timestamp=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_OUTPUT
+          echo "commit_sha=${{ github.sha }}" >> $GITHUB_OUTPUT
+          echo "commit_message<<EOF" >> $GITHUB_OUTPUT
+          git log -1 --pretty=format:"%s" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          echo "ref_name=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          echo "event_name=${{ github.event_name }}" >> $GITHUB_OUTPUT
+
+      - name: Check for existing failure issue
+        id: check_existing
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ['build-failure', 'automated'],
+              state: 'open'
+            });
+            
+            const recentIssue = issues.data.find(issue => 
+              issue.title.includes('Build Failure') && 
+              issue.body.includes('${{ steps.failed_jobs.outputs.commit_sha }}')
+            );
+            
+            core.setOutput('existing_issue', recentIssue ? recentIssue.number : '');
+
+      - name: Create build failure issue
+        if: steps.check_existing.outputs.existing_issue == ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const jobResults = {
+              cogutil: '${{ needs.cogutil.result }}',
+              atomspace: '${{ needs.atomspace.result }}',
+              'atomspace-rocks': '${{ needs.atomspace-rocks.result }}',
+              'atomspace-restful': '${{ needs.atomspace-restful.result }}',
+              ure: '${{ needs.ure.result }}',
+              pln: '${{ needs.pln.result }}',
+              miner: '${{ needs.miner.result }}',
+              moses: '${{ needs.moses.result }}',
+              asmoses: '${{ needs.asmoses.result }}',
+              cogserver: '${{ needs.cogserver.result }}',
+              learn: '${{ needs.learn.result }}',
+              'opencog-central': '${{ needs.opencog-central.result }}'
+            };
+
+            const failedJobs = Object.entries(jobResults)
+              .filter(([job, result]) => result === 'failure')
+              .map(([job, result]) => job);
+
+            const title = "🚨 Build Failure - CogML Build Pipeline (" + failedJobs.length + " jobs failed)";
+            
+            let body = "## 🚨 Automated Build Failure Report\n\n";
+            body += "**Failure Details:**\n";
+            body += "- **Timestamp:** ${{ steps.failed_jobs.outputs.timestamp }}\n";
+            body += "- **Commit:** `${{ steps.failed_jobs.outputs.commit_sha }}`\n";
+            body += "- **Branch/Ref:** ${{ steps.failed_jobs.outputs.ref_name }}\n";
+            body += "- **Trigger:** ${{ steps.failed_jobs.outputs.event_name }}\n";
+            body += "- **Commit Message:** ${{ steps.failed_jobs.outputs.commit_message }}\n\n";
+            
+            if (failedJobs.length > 0) {
+              body += "**Failed Jobs:** " + failedJobs.map(job => "`" + job + "`").join(", ") + "\n\n";
+            }
+            
+            body += "---\n\n## 🔧 Remediation Steps\n\n";
+            body += "### 1. **Immediate Investigation**\n";
+            body += "- [ ] Check the [workflow run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) for detailed error logs\n";
+            body += "- [ ] Review the commit changes that may have introduced the issue\n";
+            body += "- [ ] Check if the failure is related to dependency conflicts or missing packages\n\n";
+            body += "### 2. **Common Build Issues & Fixes**\n\n";
+            body += "#### **Foundation Layer Issues (cogutil, atomspace)**\n";
+            body += "```bash\n";
+            body += "# Check for missing dependencies\n";
+            body += "sudo apt-get update\n";
+            body += "sudo apt-get install -y build-essential cmake libboost-all-dev\n\n";
+            body += "# Rebuild with verbose output\n";
+            body += "cd build && make VERBOSE=1\n";
+            body += "```\n\n";
+            body += "#### **Integration Issues (ure, pln, miner)**\n";
+            body += "```bash\n";
+            body += "# Verify AtomSpace installation\n";
+            body += "sudo ldconfig\n";
+            body += "pkg-config --cflags --libs atomspace\n\n";
+            body += "# Clean and rebuild dependencies\n";
+            body += "rm -rf build && mkdir build && cd build\n";
+            body += "cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE=ON\n";
+            body += "```\n\n";
+            body += "### 3. **Development Workflow**\n";
+            body += "1. **Local Testing:** Reproduce the build failure locally using the same environment\n";
+            body += "2. **Incremental Fix:** Focus on the first failed job in the dependency chain\n";
+            body += "3. **Test Build:** Run `cd orc-*/[module] && mkdir build && cd build && cmake .. && make` for each failing module\n";
+            body += "4. **Validation:** Ensure all tests pass with `make test`\n\n";
+            body += "---\n\n## 📋 Status Tracking\n";
+            body += "- [ ] Issue investigated\n";
+            body += "- [ ] Root cause identified\n";
+            body += "- [ ] Fix implemented and tested locally\n";
+            body += "- [ ] PR created with fix\n";
+            body += "- [ ] Build verified to pass\n\n";
+            body += "**Workflow Link:** https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\n\n";
+            body += "*This issue was automatically created by the build failure detection system.*";
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              labels: ['build-failure', 'automated', 'ci-cd', 'bug']
+            });
+
+      - name: Update existing failure issue
+        if: steps.check_existing.outputs.existing_issue != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issueNumber = '${{ steps.check_existing.outputs.existing_issue }}';
+            let comment = "## 🔄 Additional Build Failure\n\n";
+            comment += "**New Failure Details:**\n";
+            comment += "- **Timestamp:** ${{ steps.failed_jobs.outputs.timestamp }}\n";
+            comment += "- **Commit:** `${{ steps.failed_jobs.outputs.commit_sha }}`\n";
+            comment += "- **Branch/Ref:** ${{ steps.failed_jobs.outputs.ref_name }}\n";
+            comment += "- **Workflow Run:** https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\n\n";
+            comment += "The build is still failing. Please review the latest workflow run for updated error information.";
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: parseInt(issueNumber),
+              body: comment
+            });

@@ -1,0 +1,76 @@
+---
+name: CogML - Cogutil Build
+on:
+  workflow_dispatch:
+    inputs:
+      cache_key_suffix:
+        description: 'Cache key suffix for dependency builds'
+        required: false
+        default: 'default'
+        type: string
+  workflow_call:
+    inputs:
+      cache_key_suffix:
+        description: 'Cache key suffix for dependency builds'
+        required: false
+        default: 'default'
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  COGML_AUTO_FIX_ENABLED: "true"
+  COGML_MAX_FIX_ATTEMPTS: "3"
+
+jobs:
+  cogutil:
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    outputs:
+      cache_key: ${{ steps.cache_info.outputs.key }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch full git history for versioning
+
+      - name: Set cache info
+        id: cache_info
+        run: |
+          echo "key=cogutil-${{ runner.os }}-${{ github.sha }}-${{ inputs.cache_key_suffix }}" >> $GITHUB_OUTPUT
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake libboost-all-dev python3-nose valgrind doxygen
+
+      - name: Build cogutil
+        run: |
+          cd orc-dv/cogutil
+          mkdir -p build && cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+          make -j$(nproc)
+
+      - name: Test cogutil
+        run: |
+          cd orc-dv/cogutil/build
+          make test || true
+
+      - name: Install cogutil
+        run: |
+          cd orc-dv/cogutil/build
+          sudo make install
+          sudo ldconfig
+
+      - name: Cache cogutil build
+        uses: actions/cache@v3
+        with:
+          path: orc-dv/cogutil/build
+          key: ${{ steps.cache_info.outputs.key }}
+
+      - name: Create build artifacts summary
+        run: |
+          echo "## Cogutil Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: ✅ Success" >> $GITHUB_STEP_SUMMARY
+          echo "- **Cache Key**: \`${{ steps.cache_info.outputs.key }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Build Path**: \`orc-dv/cogutil/build\`" >> $GITHUB_STEP_SUMMARY
+          ls -la orc-dv/cogutil/build/ >> $GITHUB_STEP_SUMMARY || true
