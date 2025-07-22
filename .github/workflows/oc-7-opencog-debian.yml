@@ -19,10 +19,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
+      - name: Update package lists
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+          timeout 120 sudo apt-get update --fix-missing -y || echo "apt-get update timed out, continuing..."
+        timeout-minutes: 2
+        continue-on-error: true
+        
       - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential cmake libboost-all-dev librocksdb-dev guile-3.0-dev python3-nose valgrind doxygen
+          export DEBIAN_FRONTEND=noninteractive
+          timeout 300 sudo apt-get install -y --no-install-recommends build-essential cmake libboost-all-dev librocksdb-dev guile-3.0-dev python3-nose valgrind doxygen || echo "Some packages failed to install, continuing..."
+        timeout-minutes: 5
+        continue-on-error: true
           
       - name: Install Cython
         run: python3 -m pip install --upgrade pip cython
@@ -256,10 +265,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
+      - name: Update package lists for packaging
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+          timeout 120 sudo apt-get update --fix-missing -y || echo "apt-get update timed out, continuing..."
+        timeout-minutes: 2
+        continue-on-error: true
+        
       - name: Install packaging dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential debhelper fakeroot
+          export DEBIAN_FRONTEND=noninteractive
+          sudo apt-get install -y --no-install-recommends build-essential debhelper fakeroot
+        timeout-minutes: 10
           
       - name: Build Debian Package
         run: |
