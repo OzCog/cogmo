@@ -31,6 +31,15 @@ jobs:
         with:
           path: orc-dv/cogutil/build
           key: cogutil-${{ runner.os }}-${{ github.sha }}
+
+      - name: Build cogutil if not cached
+        run: |
+          if [ ! -d "orc-dv/cogutil/build" ]; then
+            cd orc-dv/cogutil
+            mkdir -p build && cd build
+            cmake .. -DCMAKE_BUILD_TYPE=Release
+            make -j$(nproc)
+          fi
           
       - name: Install cogutil
         run: |
