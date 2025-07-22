@@ -51,33 +51,58 @@ class CognitiveAutoFix:
         error_patterns = {
             r"cannot find -l(\w+)": {
                 "type": "missing_library",
-                "fixes": ["install_library", "update_cmake_paths"],
+                "fixes": ["missing_library", "github_actions_specific"],
                 "weight": 0.9
             },
             r"No such file or directory.*\.h": {
                 "type": "missing_header",
-                "fixes": ["install_dev_package", "fix_include_paths"],
+                "fixes": ["missing_header", "opencog_dependencies"],
                 "weight": 0.85
             },
             r"undefined reference to": {
                 "type": "linking_error",
-                "fixes": ["check_link_order", "add_missing_library"],
+                "fixes": ["linking_error", "github_actions_specific"],
                 "weight": 0.8
             },
             r"CMake Error.*Could not find": {
                 "type": "cmake_package_missing",
-                "fixes": ["install_cmake_package", "update_find_package"],
+                "fixes": ["cmake_package_missing", "opencog_dependencies"],
                 "weight": 0.95
             },
             r"error: '(\w+)' was not declared": {
                 "type": "missing_declaration",
-                "fixes": ["add_include", "check_namespace"],
+                "fixes": ["missing_header", "opencog_dependencies"],
                 "weight": 0.7
             },
             r"Cython.*error": {
                 "type": "cython_compilation",
-                "fixes": ["update_cython", "fix_pyx_syntax"],
+                "fixes": ["cython_compilation"],
                 "weight": 0.75
+            },
+            r"Fatal: repository .* does not exist": {
+                "type": "git_clone_error",
+                "fixes": ["github_actions_specific"],
+                "weight": 0.9
+            },
+            r"No space left on device": {
+                "type": "disk_space_error", 
+                "fixes": ["github_actions_specific"],
+                "weight": 0.95
+            },
+            r"Permission denied": {
+                "type": "permission_error",
+                "fixes": ["github_actions_specific"], 
+                "weight": 0.8
+            },
+            r"Boost.*not found": {
+                "type": "boost_missing",
+                "fixes": ["opencog_dependencies"],
+                "weight": 0.9
+            },
+            r"guile.*not found": {
+                "type": "guile_missing", 
+                "fixes": ["opencog_dependencies"],
+                "weight": 0.9
             }
         }
         
@@ -89,6 +114,10 @@ class CognitiveAutoFix:
                 analysis["confidence"] = info["weight"]
                 analysis["suggested_fixes"] = info["fixes"]
                 analysis["tensor_disruption"] = 1.0 - info["weight"]
+                
+                # Extract specific error details for parameterized fixes
+                if match.groups():
+                    analysis["error_details"] = match.groups()
                 break
                 
         return analysis
@@ -116,7 +145,8 @@ class CognitiveAutoFix:
                 "pkg-config --libs {library}"
             ],
             "cmake_package_missing": [
-                "sudo apt-get install -y lib{package}-dev",
+                "sudo apt-get update",
+                "sudo apt-get install -y lib{package}-dev cmake",
                 "find /usr -path '*cmake*' -name '*{package}*'",
                 "export CMAKE_PREFIX_PATH=/usr/local:$CMAKE_PREFIX_PATH"
             ],
@@ -124,11 +154,31 @@ class CognitiveAutoFix:
                 "python3 -m pip install --upgrade cython",
                 "cython --version",
                 "find . -name '*.pyx' -exec cython --cplus {} \\;"
+            ],
+            "github_actions_specific": [
+                "echo 'Applying GitHub Actions environment fixes...'",
+                "export PATH=/usr/local/bin:$PATH",
+                "sudo ldconfig",
+                "mkdir -p /ws/ccache && export CCACHE_DIR=/ws/ccache"
+            ],
+            "opencog_dependencies": [
+                "sudo apt-get update",
+                "sudo apt-get install -y build-essential cmake",
+                "sudo apt-get install -y libboost-all-dev",
+                "sudo apt-get install -y guile-3.0-dev",
+                "sudo ldconfig"
             ]
         }
         
         if analysis["error_type"] in fix_strategies:
-            fix_commands = fix_strategies[analysis["error_type"]]
+            primary_fixes = fix_strategies[analysis["error_type"]]
+            fix_commands.extend(primary_fixes)
+            
+            # Apply additional fixes based on suggested fixes from analysis
+            for fix_type in analysis.get("suggested_fixes", []):
+                if fix_type in fix_strategies and fix_type != analysis["error_type"]:
+                    additional_fixes = fix_strategies[fix_type]
+                    fix_commands.extend(additional_fixes)
             
         return fix_commands
         
