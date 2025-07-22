@@ -17,10 +17,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
+      - name: Update package lists
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+          sudo apt-get update --fix-missing -y
+        timeout-minutes: 5
+        
       - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential cmake libboost-all-dev guile-3.0-dev python3-nose valgrind doxygen liboctomap-dev
+          export DEBIAN_FRONTEND=noninteractive
+          sudo apt-get install -y --no-install-recommends build-essential cmake libboost-all-dev guile-3.0-dev python3-nose valgrind doxygen liboctomap-dev
+        timeout-minutes: 10
+        retries: 3
           
       - name: Install Cython
         run: python3 -m pip install --upgrade pip cython
