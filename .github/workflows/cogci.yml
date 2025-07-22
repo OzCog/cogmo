@@ -67,9 +67,9 @@ jobs:
             echo "🤖 Activating self-healing system..."
 
             # Use our auto-fix script to attempt repairs
-            cd /home/runner/work/cogml/cogml
+            cd /home/runner/work/cogmo/cogmo
             python3 scripts/auto_fix.py \
-              --build-cmd python3 -m cython --cplus orc-as/atomspace/opencog/cython/opencog/atom.pyx \
+              --build-cmd "python3 -m cython --cplus orc-as/atomspace/opencog/cython/opencog/atom.pyx" \
               --max-attempts 2 \
               --repo-root .
           fi

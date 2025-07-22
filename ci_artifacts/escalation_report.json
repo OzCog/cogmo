@@ -1,7 +1,25 @@
 {
   "status": "escalation_required",
-  "max_attempts_reached": 2,
-  "fix_history": [],
-  "timestamp": "2025-07-12T14:16:18.740963",
-  "summary": "Automated fixes failed after 2 attempts"
+  "attempts": 2,
+  "context": "cmake_test",
+  "tensor_state": {
+    "error_patterns": [],
+    "solution_attempts": [
+      {
+        "attempt": 1,
+        "error_type": "unknown",
+        "fixes_applied": [],
+        "timestamp": "2025-07-22T10:30:21.144417"
+      },
+      {
+        "attempt": 2,
+        "error_type": "unknown",
+        "fixes_applied": [],
+        "timestamp": "2025-07-22T10:30:21.147126"
+      }
+    ],
+    "success_metrics": []
+  },
+  "timestamp": "2025-07-22T10:30:21.147143",
+  "recommendation": "Manual intervention required - error pattern not recognized"
 }
