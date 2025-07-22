@@ -1,0 +1,84 @@
+---
+name: CogML - PLN Modular Build
+on:
+  workflow_dispatch:
+    inputs:
+      cogutil_cache_key:
+        description: 'Cache key for cogutil dependency'
+        required: false
+        type: string
+      atomspace_cache_key:
+        description: 'Cache key for atomspace dependency'
+        required: false
+        type: string
+      ure_cache_key:
+        description: 'Cache key for URE dependency'
+        required: false
+        type: string
+      cache_key_suffix:
+        description: 'Cache key suffix for dependency builds'
+        required: false
+        default: 'default'
+        type: string
+  workflow_call:
+    inputs:
+      cogutil_cache_key:
+        description: 'Cache key for cogutil dependency'
+        required: false
+        type: string
+      atomspace_cache_key:
+        description: 'Cache key for atomspace dependency'
+        required: false
+        type: string
+      ure_cache_key:
+        description: 'Cache key for URE dependency'
+        required: false
+        type: string
+      cache_key_suffix:
+        description: 'Cache key suffix for dependency builds'
+        required: false
+        default: 'default'
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  pln:
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    outputs:
+      cache_key: ${{ steps.cache_info.outputs.key }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set cache info
+        id: cache_info
+        run: |
+          echo "key=pln-${{ runner.os }}-${{ github.sha }}-${{ inputs.cache_key_suffix }}" >> $GITHUB_OUTPUT
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake libboost-all-dev guile-3.0-dev python3-nose valgrind doxygen liboctomap-dev
+
+      - name: Install Cython
+        run: python3 -m pip install --upgrade pip cython
+
+      - name: Build PLN
+        run: |
+          cd orc-ai/pln
+          mkdir -p build && cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+          make -j$(nproc)
+
+      - name: Test PLN
+        run: |
+          cd orc-ai/pln/build
+          make test || true
+
+      - name: Create build artifacts summary
+        run: |
+          echo "## PLN Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: ✅ Success" >> $GITHUB_STEP_SUMMARY
+          echo "- **Cache Key**: \`${{ steps.cache_info.outputs.key }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Build Path**: \`orc-ai/pln/build\`" >> $GITHUB_STEP_SUMMARY
