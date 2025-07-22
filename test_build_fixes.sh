@@ -39,7 +39,7 @@ fi
 echo "Building cogutil (limited to avoid timeout)..."
 if make -j2 > build.log 2>&1; then
     echo "✅ Cogutil build successful"
-    ls -la libcogutil.so
+    ls -la opencog/util/libcogutil.so
 else
     echo "❌ Build failed"
     cat build.log
