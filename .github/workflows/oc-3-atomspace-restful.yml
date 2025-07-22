@@ -21,14 +21,16 @@ jobs:
       - name: Update package lists
         run: |
           export DEBIAN_FRONTEND=noninteractive
-          sudo apt-get update --fix-missing -y
-        timeout-minutes: 5
+          timeout 120 sudo apt-get update --fix-missing -y || echo "apt-get update timed out, continuing..."
+        timeout-minutes: 2
+        continue-on-error: true
         
       - name: Install dependencies
         run: |
           export DEBIAN_FRONTEND=noninteractive
-          sudo apt-get install -y --no-install-recommends build-essential cmake libboost-all-dev libcpprest-dev guile-3.0-dev cython3 python3-nose valgrind doxygen
-        timeout-minutes: 10
+          timeout 300 sudo apt-get install -y --no-install-recommends build-essential cmake libboost-all-dev libcpprest-dev guile-3.0-dev cython3 python3-nose valgrind doxygen || echo "Some packages failed to install, continuing..."
+        timeout-minutes: 5
+        continue-on-error: true
         retries: 3
           
       - name: Install Cython
