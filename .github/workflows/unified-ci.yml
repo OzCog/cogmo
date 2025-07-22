@@ -21,7 +21,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, ubuntu-20.04]
+        os: [blacksmith-4vcpu-ubuntu-2204, blacksmith-4vcpu-ubuntu-2004]
+#        os: [ubuntu-22.04, ubuntu-20.04]
         component-type: [foundation, core, ai, robotics, web]
         include:
           # Foundation components
@@ -49,7 +50,8 @@ jobs:
             components: "wb/python-client sv/cogserver"
             build-deps: "python3-dev"
 
-    runs-on: ${{ matrix.os }}
+#    runs-on: ${{ matrix.os }}
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     
     steps:
     - name: Checkout repository
@@ -121,7 +123,8 @@ jobs:
 
   # Code quality and security checks
   quality-checks:
-    runs-on: ubuntu-22.04
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+#    runs-on: ubuntu-22.04
     steps:
     - name: Checkout repository  
       uses: actions/checkout@v4
@@ -163,7 +166,8 @@ jobs:
   # Integration tests across components
   integration-tests:
     needs: build-matrix
-    runs-on: ubuntu-22.04
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+#    runs-on: ubuntu-22.04
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -197,7 +201,8 @@ jobs:
   # Performance benchmarks
   performance-tests:
     needs: build-matrix
-    runs-on: ubuntu-22.04
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+#    runs-on: ubuntu-22.04
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -224,7 +229,8 @@ jobs:
 
   # Documentation generation and validation
   documentation:
-    runs-on: ubuntu-22.04
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+#    runs-on: ubuntu-22.04
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -267,7 +273,8 @@ jobs:
   # Final status check
   ci-status:
     needs: [build-matrix, quality-checks, integration-tests, performance-tests, documentation]
-    runs-on: ubuntu-22.04
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+#    runs-on: ubuntu-22.04
     if: always()
     steps:
     - name: Check CI status
@@ -288,7 +295,8 @@ jobs:
 
   # Build failure handling for unified CI
   create-unified-ci-failure-issue:
-    runs-on: ubuntu-22.04
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+#    runs-on: ubuntu-22.04
     if: failure() && (github.event_name == 'push' || github.event_name == 'pull_request')
     needs: [build-matrix, quality-checks, integration-tests, performance-tests, documentation]
     permissions:
