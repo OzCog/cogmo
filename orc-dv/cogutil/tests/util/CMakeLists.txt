@@ -14,6 +14,7 @@ LINK_LIBRARIES(
 ADD_CXXTEST(ConfigUTest)
 ADD_CXXTEST(LoggerUTest)
 ADD_CXXTEST(StringTokenizerUTest)
+ADD_CXXTEST(TensorUtilsUTest)
 ADD_CXXTEST(lazy_selectorUTest)
 ADD_CXXTEST(lru_cacheUTest)
 ADD_CXXTEST(iostreamContainerUTest)

@@ -1,0 +1,43 @@
+#
+# Foundation Layer: Cogutil CMake Configuration Template
+# Tensor Shape: [512, 128, 8] = 524,288 DOF
+#
+@PACKAGE_INIT@
+
+# Foundation Layer tensor configuration
+set(COGUTIL_TENSOR_SHAPE_X 512)
+set(COGUTIL_TENSOR_SHAPE_Y 128)
+set(COGUTIL_TENSOR_SHAPE_Z 8)
+set(COGUTIL_DEGREES_OF_FREEDOM 524288)
+set(COGUTIL_COGNITIVE_FUNCTION "utility-primitives")
+
+# Cogutil version
+set(COGUTIL_VERSION "@PROJECT_VERSION@")
+
+# Check that tensor specifications match expected values
+if(NOT COGUTIL_DEGREES_OF_FREEDOM EQUAL 524288)
+    message(FATAL_ERROR "Cogutil tensor DOF validation failed: expected 524,288")
+endif()
+
+# Include targets
+include("${CMAKE_CURRENT_LIST_DIR}/cogutil-targets.cmake")
+
+# Set up imported target
+if(NOT TARGET cogutil::cogutil)
+    message(FATAL_ERROR "Expected cogutil target not found")
+endif()
+
+# Provide compatibility variables
+set(COGUTIL_FOUND TRUE)
+set(COGUTIL_INCLUDE_DIRS "${PACKAGE_PREFIX_DIR}/include")
+set(COGUTIL_LIBRARIES cogutil::cogutil)
+
+# Foundation Layer artifact information
+set(COGUTIL_TENSOR_CONFIG_FOUND TRUE)
+set(COGUTIL_HARDWARE_OPTIMIZED TRUE)
+
+message(STATUS "Found Cogutil Foundation Layer:")
+message(STATUS "  Version: ${COGUTIL_VERSION}")
+message(STATUS "  Tensor Shape: [${COGUTIL_TENSOR_SHAPE_X}, ${COGUTIL_TENSOR_SHAPE_Y}, ${COGUTIL_TENSOR_SHAPE_Z}]")
+message(STATUS "  Degrees of Freedom: ${COGUTIL_DEGREES_OF_FREEDOM}")
+message(STATUS "  Cognitive Function: ${COGUTIL_COGNITIVE_FUNCTION}")

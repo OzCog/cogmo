@@ -50,16 +50,25 @@ ADD_LIBRARY(cogutil SHARED
 	random.h
 	ranking.h
 	StringTokenizer.cc
+	tensor_utils.cc
 	tree.cc
 	${WIN32_GETOPT_FILES}
 	${APPLE_STRNDUP_FILES}
 )
 
 TARGET_LINK_LIBRARIES(cogutil
-	${Boost_FILESYSTEM_LIBRARY}
-	${Boost_SYSTEM_LIBRARY}
-	${Boost_THREAD_LIBRARY}
+	${CMAKE_THREAD_LIBS_INIT}
 )
+
+# Add Boost libraries only if available
+IF (Boost_FOUND)
+	TARGET_LINK_LIBRARIES(cogutil
+		${Boost_FILESYSTEM_LIBRARY}
+		${Boost_SYSTEM_LIBRARY}
+		${Boost_THREAD_LIBRARY}
+	)
+	TARGET_INCLUDE_DIRECTORIES(cogutil PRIVATE ${Boost_INCLUDE_DIRS})
+ENDIF (Boost_FOUND)
 
 IF (HAVE_BFD AND HAVE_IBERTY)
 	check_symbol_exists(bfd_get_section_flags "bfd.h" HAVE_DECL_BFD_GET_SECTION_FLAGS)
@@ -178,6 +187,7 @@ INSTALL(FILES
 	selection.h
 	sigslot.h
 	StringTokenizer.h
+	tensor_utils.h
 	tree.h
 	zipf.h
 	DESTINATION "include/opencog/util"
