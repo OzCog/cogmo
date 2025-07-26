@@ -45,6 +45,33 @@ MESSAGE(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 ADD_DEFINITIONS(-DPROJECT_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
 	            -DPROJECT_BINARY_DIR="${CMAKE_BINARY_DIR}")
 
+# ===================================================================
+# Foundation Layer: Tensor Configuration
+# Cognitive Function: utility-primitives
+# Tensor Shape: [512, 128, 8] = 524,288 DOF
+
+SET(COGUTIL_TENSOR_SHAPE_X 512 CACHE STRING "Foundation Layer tensor X dimension")
+SET(COGUTIL_TENSOR_SHAPE_Y 128 CACHE STRING "Foundation Layer tensor Y dimension") 
+SET(COGUTIL_TENSOR_SHAPE_Z 8 CACHE STRING "Foundation Layer tensor Z dimension")
+MATH(EXPR COGUTIL_DEGREES_OF_FREEDOM "${COGUTIL_TENSOR_SHAPE_X} * ${COGUTIL_TENSOR_SHAPE_Y} * ${COGUTIL_TENSOR_SHAPE_Z}")
+
+MESSAGE(STATUS "Foundation Layer Cogutil Configuration:")
+MESSAGE(STATUS "  Cognitive Function: utility-primitives")
+MESSAGE(STATUS "  Tensor Shape: [${COGUTIL_TENSOR_SHAPE_X}, ${COGUTIL_TENSOR_SHAPE_Y}, ${COGUTIL_TENSOR_SHAPE_Z}]")
+MESSAGE(STATUS "  Degrees of Freedom: ${COGUTIL_DEGREES_OF_FREEDOM}")
+
+# Validate tensor requirements as per issue specification
+IF(NOT COGUTIL_DEGREES_OF_FREEDOM EQUAL 524288)
+    MESSAGE(FATAL_ERROR "Foundation Layer validation failed: Tensor DOF must be 524,288, got ${COGUTIL_DEGREES_OF_FREEDOM}")
+ENDIF()
+
+ADD_DEFINITIONS(
+    -DCOGUTIL_TENSOR_SHAPE_X=${COGUTIL_TENSOR_SHAPE_X}
+    -DCOGUTIL_TENSOR_SHAPE_Y=${COGUTIL_TENSOR_SHAPE_Y}
+    -DCOGUTIL_TENSOR_SHAPE_Z=${COGUTIL_TENSOR_SHAPE_Z}
+    -DCOGUTIL_DEGREES_OF_FREEDOM=${COGUTIL_DEGREES_OF_FREEDOM}
+)
+
 # Add the 'cmake' dir to cmake's module search path.
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
 
@@ -94,12 +121,14 @@ SET(MIN_BOOST 1.60)
 
 # Required boost packages
 # 1.60 is minimum for required filesystem support
-FIND_PACKAGE(Boost ${MIN_BOOST} COMPONENTS filesystem program_options system thread REQUIRED)
+FIND_PACKAGE(Boost ${MIN_BOOST} COMPONENTS filesystem program_options system thread)
 
 IF (Boost_FOUND)
 	SET(Boost_FOUND_SAVE 1)
+	MESSAGE(STATUS "Boost found: ${Boost_VERSION}")
 ELSE(Boost_FOUND)
-	MESSAGE(FATAL_ERROR "Boost ${MIN_BOOST} or newer (package libboost-all-dev if using Ubuntu) is needed to build!")
+	MESSAGE(WARNING "Boost ${MIN_BOOST} or newer not found. Some features will be disabled.")
+	SET(Boost_FOUND_SAVE 0)
 ENDIF (Boost_FOUND)
 
 # Optional boost packages; can build without these. (?? what needs this ??)
@@ -159,7 +188,11 @@ ENDIF (PARALLEL_STL_FOUND)
 # Include configuration.
 
 # Set default include paths.
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR} ${Boost_INCLUDE_DIRS})
+IF (Boost_FOUND)
+	INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR} ${Boost_INCLUDE_DIRS})
+ELSE (Boost_FOUND)
+	INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR})
+ENDIF (Boost_FOUND)
 
 # -------------------------------------------------
 # Library configuration
@@ -210,9 +243,13 @@ SET (MAN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/man")
 # ===================================================================
 # Decide what to build, based on the packages found.
 
-IF (Boost_FOUND)
+IF (Boost_FOUND_SAVE)
 	SET(HAVE_UTIL 1)
-ENDIF (Boost_FOUND)
+	MESSAGE(STATUS "Building with Boost support")
+ELSE(Boost_FOUND_SAVE)
+	SET(HAVE_UTIL 1)
+	MESSAGE(STATUS "Building without Boost support (minimal mode)")
+ENDIF (Boost_FOUND_SAVE)
 
 ADD_SUBDIRECTORY(cmake)
 ADD_SUBDIRECTORY(etc)

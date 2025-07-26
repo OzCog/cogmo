@@ -29,5 +29,32 @@
 
 #define COGUTIL_VERSION_STRING "2.0.3"
 
+// Foundation Layer: Tensor Architecture Configuration
+// Cognitive Function: utility-primitives
+// Tensor Shape: [512, 128, 8] = 524,288 DOF
+#define COGUTIL_TENSOR_SHAPE_X 512
+#define COGUTIL_TENSOR_SHAPE_Y 128
+#define COGUTIL_TENSOR_SHAPE_Z 8
+#define COGUTIL_DEGREES_OF_FREEDOM (COGUTIL_TENSOR_SHAPE_X * COGUTIL_TENSOR_SHAPE_Y * COGUTIL_TENSOR_SHAPE_Z)
+
+// Compile-time tensor validation
+static_assert(COGUTIL_DEGREES_OF_FREEDOM == 524288, 
+              "Cogutil tensor DOF must equal 524,288 as per Foundation Layer specification");
+
+// Tensor type definitions for cognitive operations
+namespace opencog { namespace util {
+    
+    // Foundation Layer tensor types
+    struct TensorShape3D {
+        static constexpr size_t X = COGUTIL_TENSOR_SHAPE_X;
+        static constexpr size_t Y = COGUTIL_TENSOR_SHAPE_Y; 
+        static constexpr size_t Z = COGUTIL_TENSOR_SHAPE_Z;
+        static constexpr size_t DOF = COGUTIL_DEGREES_OF_FREEDOM;
+    };
+    
+    // Cognitive function identifier
+    static constexpr const char* COGNITIVE_FUNCTION = "utility-primitives";
+    
+}} // namespace opencog::util
 
 #endif // _OPENCOG_COGUTIL_H
