@@ -50,7 +50,6 @@ ADD_LIBRARY(cogutil SHARED
 	random.h
 	ranking.h
 	StringTokenizer.cc
-	tensor_utils.cc
 	tree.cc
 	${WIN32_GETOPT_FILES}
 	${APPLE_STRNDUP_FILES}
@@ -187,7 +186,6 @@ INSTALL(FILES
 	selection.h
 	sigslot.h
 	StringTokenizer.h
-	tensor_utils.h
 	tree.h
 	zipf.h
 	DESTINATION "include/opencog/util"
