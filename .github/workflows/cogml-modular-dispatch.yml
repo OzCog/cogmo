@@ -128,7 +128,7 @@ jobs:
   # ==== Server Layer ====
   cogserver:
     if: contains(github.event.inputs.job_selection, 'cogserver') || github.event.inputs.job_selection == 'all' || github.event.inputs.job_selection == ''
-    needs: [cogutil, atomspace]
+    needs: [cogutil, atomspace, atomspace-rocks]
     uses: ./.github/workflows/cogserver-build.yml
     with:
       cogutil_cache_key: ${{ needs.cogutil.outputs.cache_key }}
@@ -150,8 +150,8 @@ jobs:
         run: echo "Learn build would run here"
 
   # ==== Integration Layer ====
-  opencog-central:
-    if: contains(github.event.inputs.job_selection, 'opencog-central') || github.event.inputs.job_selection == 'all' || github.event.inputs.job_selection == ''
+  opencog:
+    if: contains(github.event.inputs.job_selection, 'opencog') || github.event.inputs.job_selection == 'all' || github.event.inputs.job_selection == ''
     needs: [learn, atomspace-rocks, atomspace-restful, moses, cogserver]
     runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
@@ -167,7 +167,7 @@ jobs:
   create-build-failure-issue:
     runs-on: blacksmith-4vcpu-ubuntu-2404
     if: failure() && (github.event_name == 'push' || github.event_name == 'pull_request')
-    needs: [cogutil, atomspace, atomspace-rocks, atomspace-restful, ure, pln, miner, moses, asmoses, cogserver, learn, opencog-central]
+    needs: [cogutil, atomspace, atomspace-rocks, atomspace-restful, ure, pln, miner, moses, asmoses, cogserver, learn, opencog]
     permissions:
       contents: read
       issues: write
@@ -220,7 +220,7 @@ jobs:
               asmoses: '${{ needs.asmoses.result }}',
               cogserver: '${{ needs.cogserver.result }}',
               learn: '${{ needs.learn.result }}',
-              'opencog-central': '${{ needs.opencog-central.result }}'
+              opencog: '${{ needs.opencog.result }}'
             };
 
             const failedJobs = Object.entries(jobResults)
