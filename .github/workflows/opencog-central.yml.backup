@@ -4,7 +4,7 @@ name: OpenCog Central Consolidated Build
 # This configuration orchestrates the build of all OpenCog components
 # in proper dependency order for the entire ecosystem.
 
-"on":
+on:
   push:
     branches: [ main, master, develop ]
   pull_request:
