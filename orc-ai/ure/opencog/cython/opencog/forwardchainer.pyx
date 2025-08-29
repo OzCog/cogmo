@@ -29,22 +29,22 @@ cdef class ForwardChainer:
         if vardecl is None:
             c_vardecl = UNDEFINED
         else:
-            c_vardecl = deref(vardecl.handle)
+            c_vardecl = vardecl.get_c_handle()
 
         cdef vector[cHandle] handle_vector
         for atom in focus_set:
             if isinstance(atom, Atom):
-                handle_vector.push_back(deref((<Atom>(atom)).handle))
+                handle_vector.push_back((<Atom>(atom)).get_c_handle())
         cdef AtomSpace rbs_as = rbs.atomspace
-        cdef cHandle rbs_handle = deref(rbs.handle)
-        cdef cHandle source_handle = deref(source.handle)
+        cdef cHandle rbs_handle = rbs.get_c_handle()
+        cdef cHandle source_handle = source.get_c_handle()
         self.chainer = new cForwardChainer(deref(_as.atomspace),
                                         deref(rbs_as.atomspace),
-                                        <const cHandle&>rbs_handle,
-                                        <const cHandle&>source_handle,
-                                        <const cHandle&>c_vardecl,
+                                        rbs_handle,
+                                        source_handle,
+                                        c_vardecl,
                                         <cAtomSpace*> (NULL if trace_as is None else trace_as.atomspace),
-                                        <const vector[cHandle]&>handle_vector)
+                                        handle_vector)
         self._as = _as
         self._trace_as = trace_as
 
