@@ -1,13 +1,10 @@
 name: OpenCog Central Consolidated Build
 
-permissions:
-  contents: read
-
 # OpenCog Central Consolidated GitHub Actions Configuration
 # This configuration orchestrates the build of all OpenCog components
 # in proper dependency order for the entire ecosystem.
 
-"on":
+on:
   push:
     branches: [ main, master, develop ]
   pull_request:
@@ -224,8 +221,6 @@ jobs:
 
   atomspace-restful:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
     container:
       image: ${{ github.repository }}/opencog-deps
       options: --user root
