@@ -221,6 +221,8 @@ jobs:
 
   atomspace-restful:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     container:
       image: ${{ github.repository }}/opencog-deps
       options: --user root
