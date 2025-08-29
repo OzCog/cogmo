@@ -68,7 +68,8 @@ jobs:
         run: |
           cd orc-ai/pln
           mkdir -p build && cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release
+          cmake .. -DCMAKE_BUILD_TYPE=Release \
+            -DATOMSPACE_DATA_DIR="/usr/local/share/opencog"
           make -j$(nproc)
 
       - name: Test PLN
