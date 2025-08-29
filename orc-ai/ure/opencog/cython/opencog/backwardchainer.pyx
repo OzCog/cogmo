@@ -34,19 +34,19 @@ cdef class BackwardChainer:
         if vardecl is None:
             c_vardecl = UNDEFINED
         else:
-            c_vardecl = deref(vardecl.handle)
+            c_vardecl = vardecl.get_c_handle()
         if focus_set is None:
             focus_set = _as.add_link(types.SetLink, [])
-        cdef cHandle rbs_handle = deref(rbs.handle)
-        cdef cHandle target_handle = deref(target.handle)
-        cdef cHandle focus_set_handle = deref(focus_set.handle)
+        cdef cHandle rbs_handle = rbs.get_c_handle()
+        cdef cHandle target_handle = target.get_c_handle()
+        cdef cHandle focus_set_handle = focus_set.get_c_handle()
         self.chainer = new cBackwardChainer(deref(_as.atomspace),
-                                        <const cHandle&>rbs_handle,
-                                        <const cHandle&>target_handle,
-                                        <const cHandle&>c_vardecl,
+                                        rbs_handle,
+                                        target_handle,
+                                        c_vardecl,
                                         <cAtomSpace*> (NULL if trace_as is None else trace_as.atomspace),
                                         <cAtomSpace*> (NULL if control_as is None else control_as.atomspace),
-                                        <const cHandle&>focus_set_handle)
+                                        focus_set_handle)
         self._as = _as
         self._trace_as = trace_as
         self._control_as = control_as
