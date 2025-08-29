@@ -64,6 +64,52 @@ jobs:
       - name: Install Cython
         run: python3 -m pip install --upgrade pip cython
 
+      - name: Build and install dependencies
+        run: |
+          # Build and install cogutil
+          cd orc-dv/cogutil
+          mkdir -p build && cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+          make -j$(nproc)
+          sudo make install
+          sudo ldconfig
+
+          # Build and install atomspace
+          cd ../../../orc-as/atomspace
+          if [ ! -d "lib" ]; then
+            mkdir -p lib
+            echo "# Empty lib directory for build compatibility" > lib/CMakeLists.txt
+          fi
+          mkdir -p build && cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+          make -j$(nproc)
+          sudo make install
+          sudo ldconfig
+
+          # Build and install unify
+          cd ../../../orc-ct/unify
+          mkdir -p build && cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+          make -j$(nproc)
+          sudo make install
+          sudo ldconfig
+
+          # Build and install spacetime
+          cd ../../../orc-ct/spacetime
+          mkdir -p build && cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+          make -j$(nproc)
+          sudo make install
+          sudo ldconfig
+
+          # Build and install URE
+          cd ../../../orc-ai/ure
+          mkdir -p build && cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+          make -j$(nproc)
+          sudo make install
+          sudo ldconfig
+
       - name: Build PLN
         run: |
           cd orc-ai/pln
