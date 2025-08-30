@@ -1069,6 +1069,7 @@ jobs:
 
   miner:
     runs-on: blacksmith-4vcpu-ubuntu-2404
+    needs: [pln]
     steps:
       - uses: actions/checkout@v4
       
@@ -1098,6 +1099,14 @@ jobs:
           key: atomspace-${{ runner.os }}-${{ github.sha }}
           restore-keys: |
             atomspace-${{ runner.os }}-
+
+      - name: Restore pln cache
+        uses: actions/cache@v3
+        with:
+          path: orc-ai/pln/build
+          key: pln-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            pln-${{ runner.os }}-
           
       - name: Build and install cogutil
         run: |
@@ -1437,6 +1446,7 @@ jobs:
 
   asmoses:
     runs-on: blacksmith-4vcpu-ubuntu-2404
+    needs: [pln]
     steps:
       - uses: actions/checkout@v4
       
@@ -1466,6 +1476,14 @@ jobs:
           key: atomspace-${{ runner.os }}-${{ github.sha }}
           restore-keys: |
             atomspace-${{ runner.os }}-
+
+      - name: Restore pln cache
+        uses: actions/cache@v3
+        with:
+          path: orc-ai/pln/build
+          key: pln-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            pln-${{ runner.os }}-
           
       - name: Build and install cogutil
         run: |
@@ -2281,3 +2299,138 @@ jobs:
             *.md
             *.svg
             *.png
+
+  # ==== Integration Testing ====
+  cognitive-synergy-validation:
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    needs: [learn, opencog-central]
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake libboost-all-dev guile-3.0-dev python3-nose
+          
+      - name: Restore cogutil cache
+        uses: actions/cache@v3
+        with:
+          path: orc-dv/cogutil/build
+          key: cogutil-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            cogutil-${{ runner.os }}-
+            
+      - name: Restore atomspace cache
+        uses: actions/cache@v3
+        with:
+          path: orc-as/atomspace/build
+          key: atomspace-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            atomspace-${{ runner.os }}-
+
+      - name: Restore ure cache
+        uses: actions/cache@v3
+        with:
+          path: orc-ai/ure/build
+          key: ure-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            ure-${{ runner.os }}-
+
+      - name: Restore pln cache
+        uses: actions/cache@v3
+        with:
+          path: orc-ai/pln/build
+          key: pln-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            pln-${{ runner.os }}-
+          
+      - name: Install all dependencies
+        run: |
+          # Install cogutil
+          cd orc-dv/cogutil/build
+          sudo make install
+          sudo ldconfig
+          
+          # Install atomspace
+          cd ../../orc-as/atomspace/build
+          sudo make install
+          sudo ldconfig
+          
+          # Install unify
+          git clone --depth 1 https://github.com/opencog/unify /tmp/unify
+          cd /tmp/unify
+          mkdir -p build && cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+          make -j$(nproc)
+          sudo make install
+          sudo ldconfig
+          
+          # Install URE
+          cd /home/runner/work/cogmo/cogmo/orc-ai/ure/build
+          sudo make install
+          sudo ldconfig
+          
+          # Install SpaceTime
+          cd ../../orc-ct/spacetime
+          if [ ! -d "build" ]; then
+            mkdir -p build && cd build
+            cmake .. -DCMAKE_BUILD_TYPE=Release
+            make -j$(nproc)
+          else
+            cd build
+          fi
+          sudo make install
+          sudo ldconfig
+          
+          # Install PLN
+          cd ../../orc-ai/pln/build
+          sudo make install
+          sudo ldconfig
+          
+      - name: Validate cognitive synergy
+        run: |
+          echo "=== Cognitive Synergy Validation ==="
+          echo "Validating PLN dependency chain and GGML integration readiness..."
+          
+          # Test PLN installation
+          if [ -f "/usr/local/lib/opencog/libpln.so" ] || [ -f "/usr/local/lib/libpln.so" ]; then
+            echo "✅ PLN library installation confirmed"
+          else
+            echo "❌ PLN library not found in expected locations"
+            find /usr/local -name "*pln*" -type f 2>/dev/null | head -10
+            exit 1
+          fi
+          
+          # Test URE integration
+          if [ -f "/usr/local/lib/opencog/libure.so" ] || [ -f "/usr/local/lib/libure.so" ]; then
+            echo "✅ URE library installation confirmed"
+          else
+            echo "❌ URE library not found"
+            exit 1
+          fi
+          
+          # Test AtomSpace integration
+          if [ -f "/usr/local/lib/opencog/libatomspace.so" ] || [ -f "/usr/local/lib/libatomspace.so" ]; then
+            echo "✅ AtomSpace library installation confirmed"
+          else
+            echo "❌ AtomSpace library not found"
+            exit 1
+          fi
+          
+          # Test CMake config files for GGML integration
+          if [ -f "/usr/local/lib/cmake/PLN/PLNConfig.cmake" ]; then
+            echo "✅ PLN CMake config available for GGML integration"
+          else
+            echo "⚠️  PLN CMake config not found - GGML integration may be affected"
+          fi
+          
+          # Test Guile integration for cognitive grammar
+          if command -v guile3.0 &> /dev/null; then
+            echo "✅ Guile 3.0 available for cognitive grammar kernels"
+            echo "(begin (display \"Guile PLN test: \") (+ 1 2))" | guile3.0 | grep "3" && echo "✅ Guile execution verified" || echo "⚠️  Guile execution issue"
+          else
+            echo "⚠️  Guile 3.0 not available"
+          fi
+          
+          echo "=== Cognitive Synergy Validation Complete ==="
+          echo "PLN workflow optimization successful! 🧠✨"
