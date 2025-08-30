@@ -1,6 +1,7 @@
 from libcpp.set cimport set
 from libcpp.vector cimport vector
-from atomspace cimport cHandle, cAtomSpace
+from atomspace.cHandle cimport cHandle
+from atomspace.AtomSpace cimport cAtomSpace
 from logger cimport cLogger
 
 

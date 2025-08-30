@@ -1,13 +1,13 @@
 # distutils: language = c++
 # cython: language_level=3
 from cython.operator cimport dereference as deref
-from atomspace cimport Atom, AtomSpace, cHandle, cAtomSpace
+from atomspace.cHandle cimport cHandle, UNDEFINED
+from atomspace.AtomSpace cimport AtomSpace, cAtomSpace  
+from atomspace.Atom cimport Atom
 from opencog.atomspace import types
 from ure cimport cBackwardChainer
 
-# Import UNDEFINED constant directly 
-cdef extern from "opencog/atoms/base/Handle.h" namespace "opencog":
-    cdef cHandle UNDEFINED "opencog::Handle::UNDEFINED"
+# Import UNDEFINED constant from atomspace.cHandle
 
 # Create a Cython extension type which holds a C++ instance
 # as an attribute and create a bunch of forwarding methods
