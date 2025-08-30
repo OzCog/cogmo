@@ -584,6 +584,7 @@ jobs:
   # ==== Advanced ====
   pln:
     runs-on: blacksmith-4vcpu-ubuntu-2404
+    needs: [ure]
     steps:
       - uses: actions/checkout@v4
       
@@ -613,6 +614,14 @@ jobs:
           key: atomspace-${{ runner.os }}-${{ github.sha }}
           restore-keys: |
             atomspace-${{ runner.os }}-
+
+      - name: Restore ure cache
+        uses: actions/cache@v3
+        with:
+          path: orc-ai/ure/build
+          key: ure-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            ure-${{ runner.os }}-
           
       - name: Build and install cogutil
         run: |
@@ -726,7 +735,89 @@ jobs:
           make -j$(nproc)
           sudo make install
           sudo ldconfig
+      - name: Install URE from cache or rebuild
+        run: |
+          # Try to use cached URE build first
+          cd orc-ai/ure
+          if [ -d "build" ] && [ -f "build/libure.so" ]; then
+            echo "Using cached URE build"
+            cd build
+          else
+            echo "Rebuilding URE to ensure consistency"
+            if [ ! -d "build" ]; then
+              mkdir -p build
+            fi
+            cd build
+            cmake .. -DCMAKE_BUILD_TYPE=Release
+            make -j$(nproc)
+          fi
+          sudo make install
+          sudo ldconfig
           
+          # Create URE CMake config files for dependent projects
+          sudo mkdir -p /usr/local/lib/cmake/URE
+          sudo tee /usr/local/lib/cmake/URE/UREConfig.cmake > /dev/null <<'EOF'
+          # UREConfig.cmake - Minimal config file for URE
+
+          # Set version information
+          set(PACKAGE_VERSION "1.0.0")
+          set(URE_VERSION "1.0.0")
+
+          # Version compatibility check
+          set(PACKAGE_VERSION_EXACT FALSE)
+          set(PACKAGE_VERSION_COMPATIBLE TRUE)
+          set(PACKAGE_VERSION_UNSUITABLE FALSE)
+
+          # Set basic variables
+          set(URE_FOUND TRUE)
+
+          # Set include directories
+          set(URE_INCLUDE_DIR "/usr/local/include")
+          set(URE_INCLUDE_DIRS "/usr/local/include")
+
+          # Set library directories and libraries
+          set(URE_LIBRARY_DIRS "/usr/local/lib/opencog")
+
+          # Find the URE library
+          find_library(URE_LIBRARIES
+              NAMES ure
+              PATHS /usr/local/lib/opencog
+              NO_DEFAULT_PATH
+          )
+
+          # Set other common variables
+          set(URE_DATA_DIR "/usr/local/share/opencog")
+
+          # Mark as found
+          set(URE_FOUND TRUE)
+
+          # Export targets (minimal)
+          if(NOT TARGET ure::ure)
+              add_library(ure::ure SHARED IMPORTED)
+              set_target_properties(ure::ure PROPERTIES
+                  IMPORTED_LOCATION "${URE_LIBRARIES}"
+                  INTERFACE_INCLUDE_DIRECTORIES "${URE_INCLUDE_DIRS}"
+              )
+          endif()
+
+          message(STATUS "Found URE: ${URE_LIBRARIES}")
+          EOF
+          
+          sudo tee /usr/local/lib/cmake/URE/UREConfigVersion.cmake > /dev/null <<'EOF'
+          # UREConfigVersion.cmake - Version file for URE
+
+          set(PACKAGE_VERSION "1.0.0")
+
+          # Check whether the requested PACKAGE_FIND_VERSION is compatible
+          if("${PACKAGE_VERSION}" VERSION_LESS "${PACKAGE_FIND_VERSION}")
+            set(PACKAGE_VERSION_COMPATIBLE FALSE)
+          else()
+            set(PACKAGE_VERSION_COMPATIBLE TRUE)
+            if ("${PACKAGE_VERSION}" VERSION_EQUAL "${PACKAGE_FIND_VERSION}")
+              set(PACKAGE_VERSION_EXACT TRUE)
+            endif()
+          endif()
+          EOF
       - name: Build and install URE
         run: |
           # Always rebuild and install URE to ensure consistency
@@ -905,7 +996,76 @@ jobs:
       - name: Test PLN
         run: |
           cd orc-ai/pln/build
-          make test || true
+          # Run tests with proper error handling for GGML integration validation
+          if ! make test; then
+            echo "PLN tests failed - checking for critical cognitive synergy failures"
+            # Check if basic functionality is working despite test failures
+            if [ -f "libpln.so" ] || [ -f "libpln.dylib" ] || find . -name "*pln*" -type f | grep -q .; then
+              echo "PLN build succeeded but tests failed - this may affect cognitive grammar kernels"
+              echo "Continuing build for integration testing, but marking as test failure"
+              exit 1
+            else
+              echo "Critical PLN build failure - stopping build"
+              exit 1
+            fi
+          else
+            echo "PLN tests passed - cognitive synergy confirmed"
+          fi
+          
+      - name: Install PLN
+        run: |
+          cd orc-ai/pln/build
+          sudo make install
+          sudo ldconfig
+          
+          # Create PLN CMake config files for future GGML integration
+          sudo mkdir -p /usr/local/lib/cmake/PLN
+          sudo tee /usr/local/lib/cmake/PLN/PLNConfig.cmake > /dev/null <<'EOF'
+          # PLNConfig.cmake - Config file for PLN (Probabilistic Logic Networks)
+
+          # Set version information
+          set(PACKAGE_VERSION "0.1.1")
+          set(PLN_VERSION "0.1.1")
+
+          # Set basic variables
+          set(PLN_FOUND TRUE)
+
+          # Set include directories
+          set(PLN_INCLUDE_DIRS "/usr/local/include")
+
+          # Set library directories and libraries
+          set(PLN_LIBRARY_DIRS "/usr/local/lib/opencog")
+
+          # Find the PLN library
+          find_library(PLN_LIBRARIES
+              NAMES pln
+              PATHS /usr/local/lib/opencog
+              NO_DEFAULT_PATH
+          )
+
+          # Set other common variables
+          set(PLN_DATA_DIR "/usr/local/share/opencog")
+
+          # Mark as found
+          set(PLN_FOUND TRUE)
+
+          # Export targets for GGML integration
+          if(NOT TARGET pln::pln)
+              add_library(pln::pln SHARED IMPORTED)
+              set_target_properties(pln::pln PROPERTIES
+                  IMPORTED_LOCATION "${PLN_LIBRARIES}"
+                  INTERFACE_INCLUDE_DIRECTORIES "${PLN_INCLUDE_DIRS}"
+              )
+          endif()
+
+          message(STATUS "Found PLN: ${PLN_LIBRARIES}")
+          EOF
+          
+      - name: Cache PLN build
+        uses: actions/cache@v3
+        with:
+          path: orc-ai/pln/build
+          key: pln-${{ runner.os }}-${{ github.sha }}
 
   miner:
     runs-on: blacksmith-4vcpu-ubuntu-2404
