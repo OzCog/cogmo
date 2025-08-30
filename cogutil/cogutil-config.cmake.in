@@ -1,0 +1,18 @@
+# CogUtil Configuration File
+# Foundation Layer - Core utilities - CogUtil
+
+@PACKAGE_INIT@
+
+# Define the imported target
+add_library(cogutil SHARED IMPORTED)
+
+# Set the location of the library
+set_target_properties(cogutil PROPERTIES
+    IMPORTED_LOCATION "@CMAKE_INSTALL_PREFIX@/lib/libcogutil_minimal.so"
+    INTERFACE_INCLUDE_DIRECTORIES "@CMAKE_INSTALL_PREFIX@/include"
+)
+
+# Make cogutil_minimal available as cogutil
+add_library(opencog::cogutil ALIAS cogutil)
+
+check_required_components(cogutil)
