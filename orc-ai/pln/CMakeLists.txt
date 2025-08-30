@@ -149,9 +149,11 @@ ENDIF (NOT DEFINED ATOMSPACE_DATA_DIR)
 # Add the 'cmake' directory from atomspace to search path (should be
 # the same as cogutil, but we add it just in case)
 LIST(APPEND CMAKE_MODULE_PATH ${ATOMSPACE_DATA_DIR}/cmake)
-INCLUDE(OpenCogMacros)
-INCLUDE(OpenCogGuile)
-INCLUDE(OpenCogCython)
+
+# Macros that define how atom types get declared.
+INCLUDE("${ATOMSPACE_DATA_DIR}/cmake/OpenCogMacros.cmake")
+INCLUDE("${ATOMSPACE_DATA_DIR}/cmake/OpenCogGuile.cmake")
+INCLUDE("${ATOMSPACE_DATA_DIR}/cmake/OpenCogCython.cmake")
 
 # ==========================================================
 # Decide what to build, based on the packages found.
