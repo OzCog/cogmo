@@ -294,6 +294,39 @@ SET(CPACK_DEBIAN_PACKAGE_HOMEPAGE "http://opencog.org")
 INCLUDE(CPack)
 
 # ===================================================================
+# Installation of cmake configuration files
+include(CMakePackageConfigHelpers)
+
+# Configure the package config file
+configure_package_config_file(
+	"${CMAKE_CURRENT_SOURCE_DIR}/cmake/UnifyConfig.cmake.in"
+	"${CMAKE_CURRENT_BINARY_DIR}/UnifyConfig.cmake"
+	INSTALL_DESTINATION "lib/cmake/Unify"
+	PATH_VARS CMAKE_INSTALL_PREFIX
+)
+
+# Write the version file  
+write_basic_package_version_file(
+	"${CMAKE_CURRENT_BINARY_DIR}/UnifyConfigVersion.cmake"
+	VERSION ${SEMANTIC_VERSION}
+	COMPATIBILITY SameMajorVersion
+)
+
+# Install the configuration files
+install(FILES
+	"${CMAKE_CURRENT_BINARY_DIR}/UnifyConfig.cmake"
+	"${CMAKE_CURRENT_BINARY_DIR}/UnifyConfigVersion.cmake"
+	DESTINATION "lib/cmake/Unify"
+)
+
+# Install the export targets
+install(EXPORT UnifyTargets
+	FILE UnifyTargets.cmake
+	NAMESPACE Unify::
+	DESTINATION "lib/cmake/Unify"
+)
+
+# ===================================================================
 # Show a summary of what we found, what we will do.
 
 SUMMARY_ADD("Unify" "Syntactic unifer" HAVE_UNIFY)
