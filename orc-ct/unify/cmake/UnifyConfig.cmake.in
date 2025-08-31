@@ -22,6 +22,8 @@ set(UNIFY_VERSION @SEMANTIC_VERSION@)
 # Define the Unify libraries
 set(UNIFY_LIBRARIES 
     Unify::unify
+#    Unify::unify-types
+#    Unify::unify-atoms
 )
 
 # Define include directories
