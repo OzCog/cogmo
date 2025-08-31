@@ -47,7 +47,9 @@ ADD_DEPENDENCIES(spacetime_cython spacetime-types)
 TARGET_LINK_LIBRARIES(spacetime_cython
 	${NO_AS_NEEDED}
 	spacetime-types
-	${ATOMSPACE_LIBRARIES}
+	AtomSpace::atomspace
+	AtomSpace::atombase
+	AtomSpace::atomcore
 	${PYTHON_LIBRARIES}
 )
 

@@ -12,17 +12,18 @@ include(CMakeFindDependencyMacro)
 # Find required dependencies
 find_dependency(CogUtil REQUIRED)
 find_dependency(AtomSpace REQUIRED)
+find_dependency(Boost REQUIRED)
 
 include("${CMAKE_CURRENT_LIST_DIR}/UnifyTargets.cmake")
 
 # Unify version
-set(Unify_VERSION @SEMANTIC_VERSION@)
+set(UNIFY_VERSION @SEMANTIC_VERSION@)
 
 # Define the Unify libraries
 set(UNIFY_LIBRARIES 
     Unify::unify
-    Unify::unify-types
-    Unify::unify-atoms
+#    Unify::unify-types
+#    Unify::unify-atoms
 )
 
 # Define include directories

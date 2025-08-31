@@ -40,7 +40,10 @@ ADD_LIBRARY(ure_cython
 
 TARGET_LINK_LIBRARIES(ure_cython
 	ure
-	${ATOMSPACE_LIBRARIES}
+	AtomSpace::atomspace
+	AtomSpace::atombase
+	AtomSpace::atomcore
+	AtomSpace::execution
 	${PYTHON_LIBRARIES}
 )
 

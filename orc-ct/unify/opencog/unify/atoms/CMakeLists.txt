@@ -13,7 +13,10 @@ ADD_DEPENDENCIES(unify-atoms unify_atom_types)
 TARGET_LINK_LIBRARIES(unify-atoms
 	unify-types
 	unify
-	${ATOMSPACE_LIBRARIES}
+	AtomSpace::atomspace
+	AtomSpace::atombase
+	AtomSpace::atomcore
+	AtomSpace::execution
 	${COGUTIL_LIBRARY}
 )
 

@@ -250,6 +250,34 @@ ADD_CUSTOM_TARGET(cscope
 )
 
 # ===============================================================
+# Generate and install export targets and config files
+INSTALL(EXPORT UnifyTargets
+    FILE UnifyTargets.cmake
+    NAMESPACE Unify::
+    DESTINATION lib/cmake/Unify
+)
+
+# Create and install UnifyConfig.cmake
+INCLUDE(CMakePackageConfigHelpers)
+WRITE_BASIC_PACKAGE_VERSION_FILE(
+    UnifyConfigVersion.cmake
+    VERSION ${SEMANTIC_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+
+CONFIGURE_PACKAGE_CONFIG_FILE(
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/UnifyConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/UnifyConfig.cmake
+    INSTALL_DESTINATION lib/cmake/Unify
+)
+
+INSTALL(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/UnifyConfig.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/UnifyConfigVersion.cmake
+    DESTINATION lib/cmake/Unify
+)
+
+# ===============================================================
 # Packaging
 ## Architecture the package is for.
 ## TODO: Will give error on non debian distros, fix it.

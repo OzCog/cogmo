@@ -19,7 +19,7 @@ TARGET_LINK_LIBRARIES(octomap-types
 
 ADD_DEPENDENCIES(octomap-types octomap_atom_types)
 
-INSTALL (TARGETS octomap-types
+INSTALL (TARGETS octomap-types EXPORT SpaceTimeTargets
 	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
@@ -53,7 +53,7 @@ TARGET_LINK_LIBRARIES(atom_octomap
 	octomap-types
 )
 
-INSTALL (TARGETS atom_octomap
+INSTALL (TARGETS atom_octomap EXPORT SpaceTimeTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 

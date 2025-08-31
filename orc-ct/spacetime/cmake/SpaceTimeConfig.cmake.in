@@ -1,0 +1,41 @@
+# SpaceTime Config
+#
+# Defines the following variables:
+#  SPACETIME_FOUND - True if SpaceTime was found.
+#  SPACETIME_INCLUDE_DIRS - Where to find the headers.
+#  SPACETIME_LIBRARIES - The libraries.
+
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+# Find required dependencies
+find_dependency(CogUtil REQUIRED)
+find_dependency(AtomSpace REQUIRED)
+find_dependency(Boost REQUIRED)
+
+include("${CMAKE_CURRENT_LIST_DIR}/SpaceTimeTargets.cmake")
+
+# SpaceTime version
+set(SPACETIME_VERSION @SEMANTIC_VERSION@)
+
+# Define the SpaceTime libraries
+set(SPACETIME_LIBRARIES 
+    SpaceTime::spacetime-types
+    SpaceTime::atom_octomap
+    SpaceTime::point_memory
+)
+
+# Define include directories
+set(SPACETIME_INCLUDE_DIRS "@PACKAGE_CMAKE_INSTALL_PREFIX@/include")
+
+# Backward compatibility
+set(SPACETIME_FOUND TRUE)
+set(SPACETIME_LIBRARY ${SPACETIME_LIBRARIES})
+
+# Add SPACETIME specific variables that might be used by consuming projects
+set(SPACETIME_VERSION_MAJOR 0)
+set(SPACETIME_VERSION_MINOR 1)
+set(SPACETIME_VERSION_PATCH 4)
+
+check_required_components(SpaceTime)
