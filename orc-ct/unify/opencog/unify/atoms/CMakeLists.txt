@@ -17,7 +17,7 @@ TARGET_LINK_LIBRARIES(unify-atoms
 	${COGUTIL_LIBRARY}
 )
 
-INSTALL (TARGETS unify-atoms EXPORT AtomSpaceTargets
+INSTALL (TARGETS unify-atoms EXPORT UnifyTargets
    DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 

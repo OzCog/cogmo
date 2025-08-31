@@ -23,6 +23,7 @@ TARGET_LINK_LIBRARIES(unify-types
 )
 
 INSTALL (TARGETS unify-types
+	EXPORT UnifyTargets
 	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
