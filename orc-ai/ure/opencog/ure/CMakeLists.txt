@@ -32,7 +32,13 @@ TARGET_LINK_LIBRARIES(ure
 	ure-types
 	${UNIFY_LIBRARIES}
 	${GUILE_LIBRARIES}
-	${ATOMSPACE_LIBRARIES}
+	AtomSpace::atomspace
+	AtomSpace::atombase
+	AtomSpace::atomcore
+	AtomSpace::execution
+	AtomSpace::grounded
+	AtomSpace::pattern
+	AtomSpace::rule
 	${COGUTIL_LIBRARY}
 )
 
