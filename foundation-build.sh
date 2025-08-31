@@ -29,12 +29,12 @@ INSTALL_PREFIX=${INSTALL_PREFIX:-/usr/local}
 JOBS=${JOBS:-$(nproc)}
 BUILD_DIR=${BUILD_DIR:-$(pwd)/build-foundation}
 
-# Foundation layer components (in dependency order)
+# Foundation layer components (in dependency order) 
+# Updated paths to match actual repository structure
 FOUNDATION_COMPONENTS=(
-    "cogutil"           # Core utilities - foundation of all OpenCog
+    "cogutil_minimal"   # Core utilities - foundation implementation
     "external-tools"    # External tool integrations 
-    "moses"             # Evolutionary algorithms with tensor support
-    "rust_crates"       # Rust bindings for performance
+    "cogutil"          # Full cogutil implementation
 )
 
 echo "=========================================="
@@ -162,7 +162,7 @@ build_foundation_component() {
     
     # Enhanced CMake configuration with tensor support
     echo "  Configuring with tensor support..."
-    cmake "../../$source_dir" \
+    cmake "$(pwd)/../../$source_dir" \
         -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
         -DCMAKE_INSTALL_PREFIX="$INSTALL_PREFIX" \
         -DCMAKE_PREFIX_PATH="$INSTALL_PREFIX" \
@@ -186,7 +186,7 @@ build_foundation_component() {
     
     # Install component
     echo "  Installing..."
-    make install || {
+    sudo make install || {
         echo "  Install failed for $component"
         return 1
     }
