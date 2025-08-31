@@ -7,10 +7,12 @@ ADD_LIBRARY(point_memory SHARED
 TARGET_LINK_LIBRARIES(point_memory
 	atom_octomap
 	spacetime-types
-	${ATOMSPACE_LIBRARIES}
+	AtomSpace::atomspace
+	AtomSpace::atombase
+	AtomSpace::atomcore
 )
 
-INSTALL (TARGETS point_memory
+INSTALL (TARGETS point_memory EXPORT SpaceTimeTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 

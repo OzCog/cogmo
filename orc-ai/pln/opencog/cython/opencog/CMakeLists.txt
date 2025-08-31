@@ -47,7 +47,10 @@ ADD_DEPENDENCIES(pln_cython pln-types)
 TARGET_LINK_LIBRARIES(pln_cython
 	${NO_AS_NEEDED}
 	pln-types
-	${ATOMSPACE_LIBRARIES}
+	AtomSpace::atomspace
+	AtomSpace::atombase
+	AtomSpace::atomcore
+	AtomSpace::execution
 	${PYTHON_LIBRARIES}
 )
 

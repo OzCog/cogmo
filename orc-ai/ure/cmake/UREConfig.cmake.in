@@ -1,0 +1,41 @@
+# URE Config
+#
+# Defines the following variables:
+#  URE_FOUND - True if URE was found.
+#  URE_INCLUDE_DIRS - Where to find the headers.
+#  URE_LIBRARIES - The libraries.
+
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+# Find required dependencies
+find_dependency(CogUtil REQUIRED)
+find_dependency(AtomSpace REQUIRED)
+find_dependency(Unify REQUIRED)
+find_dependency(Boost REQUIRED)
+
+include("${CMAKE_CURRENT_LIST_DIR}/URETargets.cmake")
+
+# URE version
+set(URE_VERSION @SEMANTIC_VERSION@)
+
+# Define the URE libraries
+set(URE_LIBRARIES 
+    URE::ure
+    URE::ure-types
+)
+
+# Define include directories
+set(URE_INCLUDE_DIRS "@PACKAGE_CMAKE_INSTALL_PREFIX@/include")
+
+# Backward compatibility
+set(URE_FOUND TRUE)
+set(URE_LIBRARY ${URE_LIBRARIES})
+
+# Add URE specific variables that might be used by consuming projects
+set(URE_VERSION_MAJOR 1)
+set(URE_VERSION_MINOR 0)
+set(URE_VERSION_PATCH 0)
+
+check_required_components(URE)

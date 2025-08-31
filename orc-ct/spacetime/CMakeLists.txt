@@ -193,6 +193,37 @@ ADD_CUSTOM_TARGET(cscope
 
 # ===================================================================
 # Packaging
+# ===============================================================
+# Generate and install export targets and config files
+INSTALL(EXPORT SpaceTimeTargets
+    FILE SpaceTimeTargets.cmake
+    NAMESPACE SpaceTime::
+    DESTINATION lib/cmake/SpaceTime
+)
+
+# Create and install SpaceTimeConfig.cmake
+INCLUDE(CMakePackageConfigHelpers)
+WRITE_BASIC_PACKAGE_VERSION_FILE(
+    SpaceTimeConfigVersion.cmake
+    VERSION ${SEMANTIC_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+
+CONFIGURE_PACKAGE_CONFIG_FILE(
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/SpaceTimeConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/SpaceTimeConfig.cmake
+    INSTALL_DESTINATION lib/cmake/SpaceTime
+)
+
+INSTALL(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/SpaceTimeConfig.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/SpaceTimeConfigVersion.cmake
+    DESTINATION lib/cmake/SpaceTime
+)
+
+# ===============================================================
+# Packaging
+
 ## Architecture the package is for.
 ## TODO: Will give error on non debian distros, fix it.
 EXECUTE_PROCESS(COMMAND  dpkg --print-architecture

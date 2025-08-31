@@ -277,6 +277,34 @@ ADD_CUSTOM_TARGET(ure_cscope
 )
 
 # ===============================================================
+# Generate and install export targets and config files
+INSTALL(EXPORT URETargets
+    FILE URETargets.cmake
+    NAMESPACE URE::
+    DESTINATION lib/cmake/URE
+)
+
+# Create and install UREConfig.cmake
+INCLUDE(CMakePackageConfigHelpers)
+WRITE_BASIC_PACKAGE_VERSION_FILE(
+    UREConfigVersion.cmake
+    VERSION ${SEMANTIC_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+
+CONFIGURE_PACKAGE_CONFIG_FILE(
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/UREConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/UREConfig.cmake
+    INSTALL_DESTINATION lib/cmake/URE
+)
+
+INSTALL(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/UREConfig.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/UREConfigVersion.cmake
+    DESTINATION lib/cmake/URE
+)
+
+# ===============================================================
 # Packaging
 ## Architecture the package is for.
 ## TODO: Will give error on non debian distros, fix it.
