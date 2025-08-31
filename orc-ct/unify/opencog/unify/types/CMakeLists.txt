@@ -19,7 +19,10 @@ ADD_LIBRARY (unify-types SHARED
 ADD_DEPENDENCIES(unify-types unify_atom_types)
 
 TARGET_LINK_LIBRARIES(unify-types
-	${ATOMSPACE_LIBRARIES}
+	AtomSpace::atomspace
+	AtomSpace::atombase
+	AtomSpace::atomcore
+	AtomSpace::atom_types
 )
 
 INSTALL (TARGETS unify-types

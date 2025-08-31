@@ -1,0 +1,39 @@
+# Unify Config
+#
+# Defines the following variables:
+#  UNIFY_FOUND - True if Unify was found.
+#  UNIFY_INCLUDE_DIRS - Where to find the headers.
+#  UNIFY_LIBRARIES - The libraries.
+
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+# Find required dependencies
+find_dependency(CogUtil REQUIRED)
+find_dependency(AtomSpace REQUIRED)
+find_dependency(Boost REQUIRED)
+
+include("${CMAKE_CURRENT_LIST_DIR}/UnifyTargets.cmake")
+
+# Unify version
+set(UNIFY_VERSION @SEMANTIC_VERSION@)
+
+# Define the Unify libraries
+set(UNIFY_LIBRARIES 
+    Unify::unify
+)
+
+# Define include directories
+set(UNIFY_INCLUDE_DIRS "@PACKAGE_CMAKE_INSTALL_PREFIX@/include")
+
+# Backward compatibility
+set(UNIFY_FOUND TRUE)
+set(UNIFY_LIBRARY ${UNIFY_LIBRARIES})
+
+# Add UNIFY specific variables that might be used by consuming projects
+set(UNIFY_VERSION_MAJOR 1)
+set(UNIFY_VERSION_MINOR 0)
+set(UNIFY_VERSION_PATCH 0)
+
+check_required_components(Unify)

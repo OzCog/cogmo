@@ -11,7 +11,10 @@ ADD_LIBRARY (unify
 )
 
 TARGET_LINK_LIBRARIES(unify
-	${ATOMSPACE_LIBRARIES}
+	AtomSpace::atomspace
+	AtomSpace::atombase
+	AtomSpace::atomcore
+	AtomSpace::execution
 	${COGUTIL_LIBRARY}
 )
 
