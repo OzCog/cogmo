@@ -1,0 +1,37 @@
+{
+  "timestamp": 1756643160.439714,
+  "tensor_shape": [
+    512,
+    128,
+    8
+  ],
+  "degrees_of_freedom": 524288,
+  "benchmarks": {
+    "single_tensor": {
+      "avg_time": 0.0010271549224853515,
+      "min_time": 0.0010182857513427734,
+      "max_time": 0.0010488033294677734,
+      "std_time": 8.80846144387591e-06,
+      "iterations": 10
+    },
+    "batch_processing": {
+      "batch_size": 50,
+      "total_time": 0.04554939270019531,
+      "avg_time_per_tensor": 0.0009109878540039063,
+      "throughput": 1097.70947615259
+    },
+    "recursive_depth": {
+      "1": 0.00031280517578125,
+      "3": 0.0005609989166259766,
+      "5": 0.0007090568542480469,
+      "7": 0.0007097721099853516,
+      "10": 0.0007052421569824219
+    },
+    "memory_usage": {
+      "initial_memory_mb": 39.30078125,
+      "final_memory_mb": 39.30078125,
+      "memory_growth_mb": 0.0,
+      "tensors_processed": 100
+    }
+  }
+}
