@@ -49,6 +49,22 @@
     (haskell-stack . required)
     (postgres-service . required)))
 
+(define-ggml-kernel 'core-atomspace-hypergraph
+  '((tensor-shape . (∞ ∞ ∞))
+    (dynamic-allocation . enabled)
+    (initial-shape . (1024 1024 1024))
+    (expansion-factor . 2.0)
+    (prime-factors . (dynamic))  ; Dynamically computed
+    (dtype . f32)
+    (ops . (hypergraph-materialize dynamic-expand infinite-traverse))
+    (cognitive-function . 'infinite-hypergraph-knowledge)
+    (memory-requirement . dynamic)  ; Grows as needed
+    (compute-complexity . O(log(n)))  ; Logarithmic through hypergraph structure
+    (dependencies . (foundation-cogutil))
+    (tensor-rank . dynamic)
+    (degrees-of-freedom . ∞)
+    (postgres-service . required)))
+
 ;; =================================================================
 ;; STORAGE LAYER KERNELS (Phase 2)
 ;; =================================================================
@@ -82,8 +98,8 @@
     (degrees-of-freedom . 1024000)))
 
 (define-ggml-kernel 'logic-ure
-  '((tensor-shape . (768 192 12))
-    (prime-factors . (2^8*3 2^6*3 2^2*3))
+  '((tensor-shape . (128 128 128))
+    (prime-factors . (2^7 2^7 2^7))  ; 128=2^7 for cubic tensor
     (dtype . f32)
     (ops . (forward-chain backward-chain))
     (cognitive-function . 'unified-rule-engine)
@@ -91,7 +107,19 @@
     (compute-complexity . O(n^3))
     (dependencies . (core-atomspace-standard logic-unify))
     (tensor-rank . 3)
-    (degrees-of-freedom . 1769472)))
+    (degrees-of-freedom . 2097152)))
+
+(define-ggml-kernel 'logic-pln
+  '((tensor-shape . (256 128 64))
+    (prime-factors . (2^8 2^7 2^6))  ; 256=2^8, 128=2^7, 64=2^6
+    (dtype . f32)
+    (ops . (probabilistic-inference uncertainty-propagation))
+    (cognitive-function . 'probabilistic-logic-networks)
+    (memory-requirement . 6144)
+    (compute-complexity . O(n^3))
+    (dependencies . (core-atomspace-standard logic-unify))
+    (tensor-rank . 3)
+    (degrees-of-freedom . 2097152)))
 
 ;; =================================================================
 ;; COGNITIVE LAYER KERNELS (Phase 3)
@@ -109,17 +137,29 @@
     (tensor-rank . 4)
     (degrees-of-freedom . 1638400)))
 
-(define-ggml-kernel 'cognitive-attention
-  '((tensor-shape . (512 128 8 2))
-    (prime-factors . (2^9 2^7 2^3 2))
+(define-ggml-kernel 'cognitive-ecan
+  '((tensor-shape . (512 256))
+    (prime-factors . (2^9 2^8))  ; 512=2^9, 256=2^8
     (dtype . f16)
-    (ops . (allocate-attention update-importance))
-    (cognitive-function . 'attention-allocation)
+    (ops . (allocate-attention update-importance spread-activation))
+    (cognitive-function . 'economic-attention-allocation)
     (memory-requirement . 4096)
     (compute-complexity . O(n*log(n)))
     (dependencies . (core-atomspace-standard cognitive-cogserver))
-    (tensor-rank . 4)
-    (degrees-of-freedom . 1048576)))
+    (tensor-rank . 2)
+    (degrees-of-freedom . 131072)))
+
+(define-ggml-kernel 'cognitive-moses
+  '((tensor-shape . (1024 512 256))
+    (prime-factors . (2^10 2^9 2^8))  ; 1024=2^10, 512=2^9, 256=2^8
+    (dtype . f32)
+    (ops . (evolve-programs optimize-semantics meta-learning))
+    (cognitive-function . 'meta-optimizing-semantic-evolution)
+    (memory-requirement . 16384)
+    (compute-complexity . O(n^4))
+    (dependencies . (core-atomspace-standard logic-pln))
+    (tensor-rank . 3)
+    (degrees-of-freedom . 134217728)))
 
 (define-ggml-kernel 'cognitive-spacetime
   '((tensor-shape . (896 224 14))
@@ -174,7 +214,8 @@
       (list (make-kernel-ref 'foundation-cogutil)))
     (make-membrane 'core  
       (list (make-kernel-ref 'core-atomspace-standard)
-            (make-kernel-ref 'core-atomspace-haskell)))
+            (make-kernel-ref 'core-atomspace-haskell)
+            (make-kernel-ref 'core-atomspace-hypergraph)))
     (make-membrane 'meta-cognitive
       (list (make-kernel-ref 'meta-build-orchestration)
             (make-kernel-ref 'meta-self-healing)))))
@@ -187,7 +228,8 @@
       (list (make-kernel-ref 'storage-atomspace-rocks)))
     (make-membrane 'logic
       (list (make-kernel-ref 'logic-unify)
-            (make-kernel-ref 'logic-ure)))))
+            (make-kernel-ref 'logic-ure)
+            (make-kernel-ref 'logic-pln)))))
 
 (define-tensor-field 'unified-cognitive-ci-cd-phase3
   "Phase 3: Add Cognitive processing layers"  
@@ -195,7 +237,8 @@
     (tensor-field-extend 'unified-cognitive-ci-cd-phase2)
     (make-membrane 'cognitive
       (list (make-kernel-ref 'cognitive-cogserver)
-            (make-kernel-ref 'cognitive-attention)
+            (make-kernel-ref 'cognitive-ecan)
+            (make-kernel-ref 'cognitive-moses)
             (make-kernel-ref 'cognitive-spacetime)))))
 
 ;; =================================================================
