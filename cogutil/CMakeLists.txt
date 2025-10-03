@@ -26,10 +26,12 @@ install(FILES ${COGUTIL_HEADERS}
 )
 
 # Create cogutil-config.cmake for find_package support
-configure_file(
+include(CMakePackageConfigHelpers)
+
+configure_package_config_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/cogutil-config.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/cogutil-config.cmake"
-    @ONLY
+    INSTALL_DESTINATION lib/cmake/cogutil
 )
 
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/cogutil-config.cmake"

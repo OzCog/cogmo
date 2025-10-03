@@ -39,11 +39,11 @@ message(STATUS "Discovered modules with CMakeLists.txt: ${COGML_MODULES}")
 
 # Exclude modules with known dependency issues for now
 set(EXCLUDED_MODULES
-    cogserver           # missing CogUtil
+    cogserver           # missing additional OpenCog dependencies
     gnucashcog-v3      # missing GnuCash CMake modules and glib-2.0
-    orc-as             # missing CogUtil dependency 
+    orc-as             # missing AtomSpace dependency 
     orc-oc             # missing OpenCog dependencies
-    robotics-embodied  # missing CogUtil and AtomSpace
+    robotics-embodied  # missing AtomSpace dependency
 )
 
 # Filter out excluded modules

@@ -3,16 +3,30 @@
 
 @PACKAGE_INIT@
 
-# Define the imported target
-add_library(cogutil SHARED IMPORTED)
+include(CMakeFindDependencyMacro)
 
-# Set the location of the library
-set_target_properties(cogutil PROPERTIES
-    IMPORTED_LOCATION "@CMAKE_INSTALL_PREFIX@/lib/libcogutil_minimal.so"
-    INTERFACE_INCLUDE_DIRECTORIES "@CMAKE_INSTALL_PREFIX@/include"
-)
+# Define the imported target
+if(NOT TARGET cogutil)
+    add_library(cogutil SHARED IMPORTED)
+    
+    # Set the location of the library
+    set_target_properties(cogutil PROPERTIES
+        IMPORTED_LOCATION "@CMAKE_INSTALL_PREFIX@/lib/libcogutil_minimal.so"
+        INTERFACE_INCLUDE_DIRECTORIES "@CMAKE_INSTALL_PREFIX@/include"
+    )
+endif()
 
 # Make cogutil_minimal available as cogutil
-add_library(opencog::cogutil ALIAS cogutil)
+if(NOT TARGET opencog::cogutil)
+    add_library(opencog::cogutil ALIAS cogutil)
+endif()
 
-check_required_components(cogutil)
+# Set variables for compatibility
+set(COGUTIL_FOUND TRUE)
+set(CogUtil_FOUND TRUE)
+set(COGUTIL_LIBRARIES cogutil)
+set(COGUTIL_INCLUDE_DIRS "@CMAKE_INSTALL_PREFIX@/include")
+set(COGUTIL_DATA_DIR "@CMAKE_INSTALL_PREFIX@/share/opencog")
+
+# Components check - simple version without check_required_components
+set(cogutil_FOUND TRUE)
