@@ -27,7 +27,7 @@ echo ""
 
 # Run the comprehensive test suite
 cd build
-./cogutil/cogutil_minimal_build/test_cogutil_minimal
+./cogutil_minimal_build/test_cogutil_minimal
 
 echo ""
 echo "=========================================="
