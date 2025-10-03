@@ -41,7 +41,6 @@ message(STATUS "Discovered modules with CMakeLists.txt: ${COGML_MODULES}")
 set(EXCLUDED_MODULES
     cogserver           # missing CogUtil
     gnucashcog-v3      # missing GnuCash CMake modules and glib-2.0
-    orc-as             # missing CogUtil dependency 
     orc-oc             # missing OpenCog dependencies
     robotics-embodied  # missing CogUtil and AtomSpace
 )
