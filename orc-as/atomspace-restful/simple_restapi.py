@@ -300,7 +300,7 @@ def initialize_test_data():
 # Register API endpoints
 api.add_resource(AtomCollectionAPI, 
                 '/api/v1.1/atoms', 
-                '/api/v1.1/atoms/<int:atom_id>')
+                '/api/v1.1/atoms/<string:atom_id>')
 api.add_resource(TypesAPI, '/api/v1.1/types')
 api.add_resource(StatsAPI, '/api/v1.1/stats')
 api.add_resource(ValidateAPI, '/api/v1.1/validate')
