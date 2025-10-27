@@ -8,7 +8,8 @@ from opencog.web.api.apitypes import *
 from opencog.web.api.apishell import *
 from opencog.web.api.apischeme import *
 from opencog.web.api.apighost import *
-from flask_restful_swagger import swagger
+# Using flask-restx instead of deprecated flask-restful-swagger
+from flask_restx import Api, Resource, fields
 
 
 class RESTAPI(object):
@@ -21,7 +22,7 @@ class RESTAPI(object):
     http://wiki.opencog.org/w/REST_API
 
     Prerequisites:
-    Flask, mock, flask-restful, six, flask-restful-swagger
+    Flask, flask-restful, flask-cors, flask-restx
 
     Default endpoint: http://127.0.0.1:5000/api/v1.1/
     (Replace 127.0.0.1 with the IP address of the server if necessary)
@@ -38,7 +39,9 @@ class RESTAPI(object):
 
         # Initialize the web server and set the routing
         self.app = Flask(__name__, static_url_path="")
-        self.api = swagger.docs(Api(self.app), apiVersion='1.1', api_spec_url='/api/v1.1/spec')
+        self.api = Api(self.app, version='1.1', title='AtomSpace REST API', 
+                      description='RESTful interface to OpenCog AtomSpace',
+                      doc='/api/v1.1/')
 
         # Allow Cross Origin Resource Sharing (CORS) so that javascript apps
         # can use this API from other domains, ports and protocols. 
@@ -51,7 +54,7 @@ class RESTAPI(object):
         scheme_api = SchemeAPI.new(self.atomspace)
         ghost_api = GhostApi.new(self.atomspace)
 
-        self.api.decorators=[cors.crossdomain(origin='*', automatic_options=False)]
+        # CORS is already handled by CORS(self.app) above
 
         self.api.add_resource(atom_collection_api,
                               '/api/v1.1/atoms',

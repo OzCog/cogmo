@@ -4,7 +4,7 @@ from flask import json, current_app
 from flask_restful import Resource, reqparse
 from opencog.web.api.mappers import *
 from flask_restful.utils import cors
-from flask_restful_swagger import swagger
+# Using flask-restx instead of deprecated swagger
 
 class TypesAPI(Resource):
     def __init__(self):
@@ -15,25 +15,6 @@ class TypesAPI(Resource):
     # Set CORS headers to allow cross-origin access
     # (https://github.com/twilio/flask-restful/pull/131):
     @cors.crossdomain(origin='*')
-    @swagger.operation(
-	notes='''
-Returns a JSON representation of a list of valid atom types
-
-<p>Example:
-
-<pre>
-{"types": ["TrueLink", "NumberNode", "OrLink",
-  "PrepositionalRelationshipNode"]}
-</pre>
-''',
-	responseClass='response',
-	nickname='get',
-	parameters=[
-	],
-	responseMessages=[
-	    {'code': 200, 'message': 'Returned list of valid atom types'},
-	]
-    )
     def get(self):
         """
         Returns a list of valid atom types
