@@ -209,6 +209,462 @@ jobs:
           paths:
             - atomspace-restful
 
+  atomspace-cog:
+    <<: *common_config
+    working_directory: /ws/atomspace-cog
+    steps:
+      - attach_workspace:
+          at: /ws/
+      - run:
+          name: Install CogUtil
+          command: cd /ws/cogutil/build && make -j2 install && ldconfig
+      - run:
+          name: Install AtomSpace
+          command: cd /ws/atomspace/build && make -j2 install && ldconfig
+      - run:
+          name: Checkout AtomSpace-Cog
+          command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/atomspace-cog .
+      - run:
+          name: CMake Configure
+          command: mkdir build && cd build && cmake ..
+      - run:
+          name: Build
+          command: cd build && make -j2
+      - run:
+          name: Build tests
+          command: cd build && make -j2 tests
+      - run:
+          name: Run tests
+          command: cd build && make check
+      - run:
+          name: Install AtomSpace-Cog
+          command: cd build && make -j2 install && ldconfig
+      - run:
+          name: Print test log
+          command: cat build/tests/Testing/Temporary/LastTest.log
+          when: always
+      - persist_to_workspace:
+          root: /ws/
+          paths:
+            - atomspace-cog
+
+  atomspace-dht:
+    <<: *common_config
+    working_directory: /ws/atomspace-dht
+    steps:
+      - attach_workspace:
+          at: /ws/
+      - run:
+          name: Install CogUtil
+          command: cd /ws/cogutil/build && make -j2 install && ldconfig
+      - run:
+          name: Install AtomSpace
+          command: cd /ws/atomspace/build && make -j2 install && ldconfig
+      - run:
+          name: Checkout AtomSpace-DHT
+          command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/atomspace-dht .
+      - run:
+          name: CMake Configure
+          command: mkdir build && cd build && cmake ..
+      - run:
+          name: Build
+          command: cd build && make -j2
+      - run:
+          name: Build tests
+          command: cd build && make -j2 tests
+      - run:
+          name: Run tests
+          command: cd build && make check
+      - run:
+          name: Install AtomSpace-DHT
+          command: cd build && make -j2 install && ldconfig
+      - run:
+          name: Print test log
+          command: cat build/tests/Testing/Temporary/LastTest.log
+          when: always
+      - persist_to_workspace:
+          root: /ws/
+          paths:
+            - atomspace-dht
+
+  atomspace-ipfs:
+    <<: *common_config
+    working_directory: /ws/atomspace-ipfs
+    steps:
+      - attach_workspace:
+          at: /ws/
+      - run:
+          name: Install CogUtil
+          command: cd /ws/cogutil/build && make -j2 install && ldconfig
+      - run:
+          name: Install AtomSpace
+          command: cd /ws/atomspace/build && make -j2 install && ldconfig
+      - run:
+          name: Checkout AtomSpace-IPFS
+          command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/atomspace-ipfs .
+      - run:
+          name: CMake Configure
+          command: mkdir build && cd build && cmake ..
+      - run:
+          name: Build
+          command: cd build && make -j2
+      - run:
+          name: Build tests
+          command: cd build && make -j2 tests
+      - run:
+          name: Run tests
+          command: cd build && make check
+      - run:
+          name: Install AtomSpace-IPFS
+          command: cd build && make -j2 install && ldconfig
+      - run:
+          name: Print test log
+          command: cat build/tests/Testing/Temporary/LastTest.log
+          when: always
+      - persist_to_workspace:
+          root: /ws/
+          paths:
+            - atomspace-ipfs
+
+  atomspace-websockets:
+    <<: *common_config
+    working_directory: /ws/atomspace-websockets
+    steps:
+      - attach_workspace:
+          at: /ws/
+      - run:
+          name: Install CogUtil
+          command: cd /ws/cogutil/build && make -j2 install && ldconfig
+      - run:
+          name: Install AtomSpace
+          command: cd /ws/atomspace/build && make -j2 install && ldconfig
+      - run:
+          name: Checkout AtomSpace-WebSockets
+          command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/atomspace-websockets .
+      - run:
+          name: CMake Configure
+          command: mkdir build && cd build && cmake ..
+      - run:
+          name: Build
+          command: cd build && make -j2
+      - run:
+          name: Build tests
+          command: cd build && make -j2 tests
+      - run:
+          name: Run tests
+          command: cd build && make check
+      - run:
+          name: Install AtomSpace-WebSockets
+          command: cd build && make -j2 install && ldconfig
+      - run:
+          name: Print test log
+          command: cat build/tests/Testing/Temporary/LastTest.log
+          when: always
+      - persist_to_workspace:
+          root: /ws/
+          paths:
+            - atomspace-websockets
+
+  atomspace-metta:
+    <<: *common_config
+    working_directory: /ws/atomspace-metta
+    steps:
+      - attach_workspace:
+          at: /ws/
+      - run:
+          name: Install CogUtil
+          command: cd /ws/cogutil/build && make -j2 install && ldconfig
+      - run:
+          name: Install AtomSpace
+          command: cd /ws/atomspace/build && make -j2 install && ldconfig
+      - run:
+          name: Checkout AtomSpace-MeTTa
+          command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/atomspace-metta .
+      - run:
+          name: CMake Configure
+          command: mkdir build && cd build && cmake ..
+      - run:
+          name: Build
+          command: cd build && make -j2
+      - run:
+          name: Build tests
+          command: cd build && make -j2 tests
+      - run:
+          name: Run tests
+          command: cd build && make check
+      - run:
+          name: Install AtomSpace-MeTTa
+          command: cd build && make -j2 install && ldconfig
+      - run:
+          name: Print test log
+          command: cat build/tests/Testing/Temporary/LastTest.log
+          when: always
+      - persist_to_workspace:
+          root: /ws/
+          paths:
+            - atomspace-metta
+
+  atomspace-bridge:
+    <<: *common_config
+    working_directory: /ws/atomspace-bridge
+    steps:
+      - attach_workspace:
+          at: /ws/
+      - run:
+          name: Install CogUtil
+          command: cd /ws/cogutil/build && make -j2 install && ldconfig
+      - run:
+          name: Install AtomSpace
+          command: cd /ws/atomspace/build && make -j2 install && ldconfig
+      - run:
+          name: Checkout AtomSpace-Bridge
+          command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/atomspace-bridge .
+      - run:
+          name: CMake Configure
+          command: mkdir build && cd build && cmake ..
+      - run:
+          name: Build
+          command: cd build && make -j2
+      - run:
+          name: Build tests
+          command: cd build && make -j2 tests
+      - run:
+          name: Run tests
+          command: cd build && make check
+      - run:
+          name: Install AtomSpace-Bridge
+          command: cd build && make -j2 install && ldconfig
+      - run:
+          name: Print test log
+          command: cat build/tests/Testing/Temporary/LastTest.log
+          when: always
+      - persist_to_workspace:
+          root: /ws/
+          paths:
+            - atomspace-bridge
+
+  atomspace-agents:
+    <<: *common_config
+    working_directory: /ws/atomspace-agents
+    steps:
+      - attach_workspace:
+          at: /ws/
+      - run:
+          name: Install CogUtil
+          command: cd /ws/cogutil/build && make -j2 install && ldconfig
+      - run:
+          name: Install AtomSpace
+          command: cd /ws/atomspace/build && make -j2 install && ldconfig
+      - run:
+          name: Checkout AtomSpace-Agents
+          command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/atomspace-agents .
+      - run:
+          name: CMake Configure
+          command: mkdir build && cd build && cmake ..
+      - run:
+          name: Build
+          command: cd build && make -j2
+      - run:
+          name: Build tests
+          command: cd build && make -j2 tests
+      - run:
+          name: Run tests
+          command: cd build && make check
+      - run:
+          name: Install AtomSpace-Agents
+          command: cd build && make -j2 install && ldconfig
+      - run:
+          name: Print test log
+          command: cat build/tests/Testing/Temporary/LastTest.log
+          when: always
+      - persist_to_workspace:
+          root: /ws/
+          paths:
+            - atomspace-agents
+
+  atomspace-rpc:
+    <<: *common_config
+    working_directory: /ws/atomspace-rpc
+    steps:
+      - attach_workspace:
+          at: /ws/
+      - run:
+          name: Install CogUtil
+          command: cd /ws/cogutil/build && make -j2 install && ldconfig
+      - run:
+          name: Install AtomSpace
+          command: cd /ws/atomspace/build && make -j2 install && ldconfig
+      - run:
+          name: Checkout AtomSpace-RPC
+          command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/atomspace-rpc .
+      - run:
+          name: CMake Configure
+          command: mkdir build && cd build && cmake ..
+      - run:
+          name: Build
+          command: cd build && make -j2
+      - run:
+          name: Build tests
+          command: cd build && make -j2 tests
+      - run:
+          name: Run tests
+          command: cd build && make check
+      - run:
+          name: Install AtomSpace-RPC
+          command: cd build && make -j2 install && ldconfig
+      - run:
+          name: Print test log
+          command: cat build/tests/Testing/Temporary/LastTest.log
+          when: always
+      - persist_to_workspace:
+          root: /ws/
+          paths:
+            - atomspace-rpc
+
+  atomspace-js:
+    <<: *common_config
+    working_directory: /ws/atomspace-js
+    steps:
+      - attach_workspace:
+          at: /ws/
+      - run:
+          name: Install CogUtil
+          command: cd /ws/cogutil/build && make -j2 install && ldconfig
+      - run:
+          name: Install AtomSpace
+          command: cd /ws/atomspace/build && make -j2 install && ldconfig
+      - run:
+          name: Checkout AtomSpace-JS
+          command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/atomspace-js .
+      - run:
+          name: Install Node.js dependencies
+          command: |
+            if [ -f package.json ]; then
+              npm install
+            fi
+      - run:
+          name: Build (CMake or NPM)
+          command: |
+            if [ -f CMakeLists.txt ]; then
+              mkdir build && cd build && cmake .. && make -j2
+            elif [ -f package.json ]; then
+              npm run build
+            fi
+      - run:
+          name: Run tests
+          command: |
+            if [ -f build/Makefile ]; then
+              cd build && make check
+            elif [ -f package.json ]; then
+              npm test
+            fi
+      - run:
+          name: Install AtomSpace-JS
+          command: |
+            if [ -f build/Makefile ]; then
+              cd build && make install && ldconfig
+            fi
+      - persist_to_workspace:
+          root: /ws/
+          paths:
+            - atomspace-js
+
+  atomspace-typescript:
+    <<: *common_config
+    working_directory: /ws/atomspace-typescript
+    steps:
+      - attach_workspace:
+          at: /ws/
+      - run:
+          name: Install CogUtil
+          command: cd /ws/cogutil/build && make -j2 install && ldconfig
+      - run:
+          name: Install AtomSpace
+          command: cd /ws/atomspace/build && make -j2 install && ldconfig
+      - run:
+          name: Checkout AtomSpace-TypeScript
+          command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/atomspace-typescript .
+      - run:
+          name: Install Node.js dependencies
+          command: |
+            if [ -f package.json ]; then
+              npm install
+            fi
+      - run:
+          name: Build (CMake or NPM)
+          command: |
+            if [ -f CMakeLists.txt ]; then
+              mkdir build && cd build && cmake .. && make -j2
+            elif [ -f package.json ]; then
+              npm run build
+            fi
+      - run:
+          name: Run tests  
+          command: |
+            if [ -f build/Makefile ]; then
+              cd build && make check
+            elif [ -f package.json ]; then
+              npm test
+            fi
+      - run:
+          name: Install AtomSpace-TypeScript
+          command: |
+            if [ -f build/Makefile ]; then
+              cd build && make install && ldconfig
+            fi
+      - persist_to_workspace:
+          root: /ws/
+          paths:
+            - atomspace-typescript
+
+  atomspace-explorer:
+    <<: *common_config
+    working_directory: /ws/atomspace-explorer
+    steps:
+      - attach_workspace:
+          at: /ws/
+      - run:
+          name: Install CogUtil
+          command: cd /ws/cogutil/build && make -j2 install && ldconfig
+      - run:
+          name: Install AtomSpace
+          command: cd /ws/atomspace/build && make -j2 install && ldconfig
+      - run:
+          name: Checkout AtomSpace-Explorer
+          command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/atomspace-explorer .
+      - run:
+          name: Install Node.js dependencies
+          command: |
+            if [ -f package.json ]; then
+              npm install
+            fi
+      - run:
+          name: Build (CMake or NPM)
+          command: |
+            if [ -f CMakeLists.txt ]; then
+              mkdir build && cd build && cmake .. && make -j2
+            elif [ -f package.json ]; then
+              npm run build
+            fi
+      - run:
+          name: Run tests
+          command: |
+            if [ -f build/Makefile ]; then
+              cd build && make check
+            elif [ -f package.json ]; then
+              npm test
+            fi
+      - run:
+          name: Install AtomSpace-Explorer
+          command: |
+            if [ -f build/Makefile ]; then
+              cd build && make install && ldconfig
+            fi
+      - persist_to_workspace:
+          root: /ws/
+          paths:
+            - atomspace-explorer
+
   # =================================================================
   # Logic Layer - Unification and reasoning
   # =================================================================
@@ -809,7 +1265,7 @@ workflows:
       # Foundation Layer
       - cogutil
       
-      # Core Layer
+      # Core Layer - AtomSpace and Extensions
       - atomspace:
           requires:
             - cogutil
@@ -817,6 +1273,39 @@ workflows:
           requires:
             - atomspace
       - atomspace-restful:
+          requires:
+            - atomspace
+      - atomspace-cog:
+          requires:
+            - atomspace
+      - atomspace-dht:
+          requires:
+            - atomspace
+      - atomspace-ipfs:
+          requires:
+            - atomspace
+      - atomspace-websockets:
+          requires:
+            - atomspace
+      - atomspace-metta:
+          requires:
+            - atomspace
+      - atomspace-bridge:
+          requires:
+            - atomspace
+      - atomspace-agents:
+          requires:
+            - atomspace
+      - atomspace-rpc:
+          requires:
+            - atomspace
+      - atomspace-js:
+          requires:
+            - atomspace
+      - atomspace-typescript:
+          requires:
+            - atomspace
+      - atomspace-explorer:
           requires:
             - atomspace
       
